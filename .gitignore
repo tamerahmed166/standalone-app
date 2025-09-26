@@ -1,0 +1,365 @@
+# ملفات النظام
+.DS_Store
+Thumbs.db
+*.log
+
+# ملفات التطوير
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ملفات الإعدادات
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ملفات البناء
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# ملفات IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات مؤقتة
+*.tmp
+*.temp
+.cache/
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+*~
+
+# ملفات الاختبار
+coverage/
+.nyc_output/
+
+# ملفات PWA
+sw.js.map
+workbox-*.js
+
+# ملفات TypeScript
+*.tsbuildinfo
+
+# ملفات Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ملفات Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ملفات C/C++
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ملفات Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# ملفات Rust
+target/
+Cargo.lock
+
+# ملفات PHP
+vendor/
+composer.lock
+
+# ملفات Ruby
+Gemfile.lock
+.bundle/
+vendor/bundle/
+
+# ملفات .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.log
+
+# ملفات Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# ملفات Kubernetes
+*.yaml
+*.yml
+!package.yaml
+!package.yml
+
+# ملفات Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ملفات Ansible
+*.retry
+
+# ملفات Vagrant
+.vagrant/
+
+# ملفات المطور
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات Git
+.git/
+.gitignore
+
+# ملفات GitHub
+.github/
+
+# ملفات CI/CD
+.travis.yml
+.circleci/
+.github/workflows/
+
+# ملفات الاختبار
+test-results/
+playwright-report/
+test-results.xml
+
+# ملفات الأداء
+lighthouse-report.html
+*.lighthouse.html
+
+# ملفات الأمان
+*.pem
+*.key
+*.crt
+*.csr
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+*~
+
+# ملفات مؤقتة
+*.tmp
+*.temp
+.cache/
+
+# ملفات النظام
+.DS_Store
+Thumbs.db
+*.log
+
+# ملفات التطوير
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ملفات الإعدادات
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ملفات البناء
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# ملفات IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات مؤقتة
+*.tmp
+*.temp
+.cache/
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+*~
+
+# ملفات الاختبار
+coverage/
+.nyc_output/
+
+# ملفات PWA
+sw.js.map
+workbox-*.js
+
+# ملفات TypeScript
+*.tsbuildinfo
+
+# ملفات Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# ملفات Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ملفات C/C++
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ملفات Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# ملفات Rust
+target/
+Cargo.lock
+
+# ملفات PHP
+vendor/
+composer.lock
+
+# ملفات Ruby
+Gemfile.lock
+.bundle/
+vendor/bundle/
+
+# ملفات .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.log
+
+# ملفات Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# ملفات Kubernetes
+*.yaml
+*.yml
+!package.yaml
+!package.yml
+
+# ملفات Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ملفات Ansible
+*.retry
+
+# ملفات Vagrant
+.vagrant/
+
+# ملفات المطور
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ملفات Git
+.git/
+.gitignore
+
+# ملفات GitHub
+.github/
+
+# ملفات CI/CD
+.travis.yml
+.circleci/
+.github/workflows/
+
+# ملفات الاختبار
+test-results/
+playwright-report/
+test-results.xml
+
+# ملفات الأداء
+lighthouse-report.html
+*.lighthouse.html
+
+# ملفات الأمان
+*.pem
+*.key
+*.crt
+*.csr
+
+# ملفات النسخ الاحتياطي
+*.bak
+*.backup
+*~
+
+# ملفات مؤقتة
+*.tmp
+*.temp
+.cache/

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مترجم الصوت الذكي - تطبيق مستقل</title>
+    <meta name="description" content="تطبيق ويب متقدم للترجمة الصوتية والنصية يعمل بدون خادم">
+    <meta name="theme-color" content="#4F46E5">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background: rgba(255, 255, 255, 0.9);
+            color: #374151;
+            margin-right: auto;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #9CA3AF;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // Mock Translation Service
+        class MockTranslationService {
+            static async translate(text, sourceLang, targetLang) {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Mock translations
+                const translations = {
+                    'ar-en': {
+                        'مرحبا': 'Hello',
+                        'كيف حالك': 'How are you',
+                        'شكرا': 'Thank you',
+                        'مع السلامة': 'Goodbye',
+                        'أهلا وسهلا': 'Welcome',
+                        'صباح الخير': 'Good morning',
+                        'مساء الخير': 'Good evening',
+                        'السلام عليكم': 'Peace be upon you'
+                    },
+                    'en-ar': {
+                        'Hello': 'مرحبا',
+                        'How are you': 'كيف حالك',
+                        'Thank you': 'شكرا',
+                        'Goodbye': 'مع السلامة',
+                        'Welcome': 'أهلا وسهلا',
+                        'Good morning': 'صباح الخير',
+                        'Good evening': 'مساء الخير',
+                        'Peace be upon you': 'السلام عليكم'
+                    },
+                    'ar-fr': {
+                        'مرحبا': 'Bonjour',
+                        'كيف حالك': 'Comment allez-vous',
+                        'شكرا': 'Merci',
+                        'مع السلامة': 'Au revoir'
+                    },
+                    'fr-ar': {
+                        'Bonjour': 'مرحبا',
+                        'Comment allez-vous': 'كيف حالك',
+                        'Merci': 'شكرا',
+                        'Au revoir': 'مع السلامة'
+                    }
+                };
+                
+                const key = `${sourceLang}-${targetLang}`;
+                const translationMap = translations[key] || {};
+                
+                // Try to find exact match first
+                if (translationMap[text]) {
+                    return translationMap[text];
+                }
+                
+                // If no exact match, return a generic response
+                const genericResponses = {
+                    'ar-en': `[Translated from Arabic]: ${text}`,
+                    'en-ar': `[مترجم من الإنجليزية]: ${text}`,
+                    'ar-fr': `[Traduit de l'arabe]: ${text}`,
+                    'fr-ar': `[مترجم من الفرنسية]: ${text}`
+                };
+                
+                return genericResponses[key] || `Translation: ${text}`;
+            }
+        }
+        
+        // Navigation Component
+        function Navigation({ currentPage, onPageChange }) {
+            const pages = [
+                { id: 'home', name: 'الرئيسية', icon: '🏠' },
+                { id: 'translate', name: 'الترجمة', icon: '🌐' },
+                { id: 'conversation', name: 'المحادثة', icon: '💬' },
+                { id: 'settings', name: 'الإعدادات', icon: '⚙️' }
+            ];
+            
+            return (
+                <nav className="glass-effect p-4 mb-6 rounded-lg">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                            <span className="text-3xl">🌐</span>
+                            مترجم الصوت الذكي
+                        </h1>
+                        <div className="flex gap-2">
+                            {pages.map(page => (
+                                <button
+                                    key={page.id}
+                                    onClick={() => onPageChange(page.id)}
+                                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                                        currentPage === page.id
+                                            ? 'bg-white text-purple-600 font-semibold'
+                                            : 'text-white hover:bg-white hover:bg-opacity-20'
+                                    }`}
+                                >
+                                    <span className="mr-2">{page.icon}</span>
+                                    {page.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+        
+        // Home Page Component
+        function HomePage() {
+            return (
+                <div className="fade-in">
+                    <div className="text-center mb-8">
+                        <h2 className="text-4xl font-bold text-white mb-4">
+                            مرحباً بك في مترجم الصوت الذكي
+                        </h2>
+                        <p className="text-xl text-white opacity-90">
+                            تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
+                        </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="glass-effect p-6 rounded-lg text-center floating-animation">
+                            <div className="text-4xl mb-4">🌐</div>
+                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة نصية</h3>
+                            <p className="text-white opacity-80">ترجمة فورية للنصوص بين أكثر من 100 لغة</p>
+                        </div>
+                        
+                        <div className="glass-effect p-6 rounded-lg text-center floating-animation" style={{animationDelay: '2s'}}>
+                            <div className="text-4xl mb-4">🎤</div>
+                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة صوتية</h3>
+                            <p className="text-white opacity-80">تحويل الصوت إلى نص وترجمته فورياً</p>
+                        </div>
+                        
+                        <div className="glass-effect p-6 rounded-lg text-center floating-animation" style={{animationDelay: '4s'}}>
+                            <div className="text-4xl mb-4">💬</div>
+                            <h3 className="text-xl font-semibold text-white mb-2">محادثة فورية</h3>
+                            <p className="text-white opacity-80">محادثات مباشرة مع ترجمة تلقائية</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Translation Page Component
+        function TranslationPage() {
+            const [inputText, setInputText] = useState('');
+            const [outputText, setOutputText] = useState('');
+            const [sourceLang, setSourceLang] = useState('ar');
+            const [targetLang, setTargetLang] = useState('en');
+            const [isTranslating, setIsTranslating] = useState(false);
+            const [recentTranslations, setRecentTranslations] = useState([]);
+            
+            const languages = [
+                { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                { code: 'en', name: 'English', flag: '🇺🇸' },
+                { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                { code: 'es', name: 'Español', flag: '🇪🇸' },
+                { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+                { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+                { code: 'pt', name: 'Português', flag: '🇵🇹' },
+                { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+                { code: 'zh', name: '中文', flag: '🇨🇳' },
+                { code: 'ja', name: '日本語', flag: '🇯🇵' }
+            ];
+            
+            const handleTranslate = async () => {
+                if (!inputText.trim()) return;
+                
+                setIsTranslating(true);
+                try {
+                    const translation = await MockTranslationService.translate(inputText, sourceLang, targetLang);
+                    setOutputText(translation);
+                    
+                    // Add to recent translations
+                    const newTranslation = {
+                        id: Date.now(),
+                        original: inputText,
+                        translated: translation,
+                        sourceLang,
+                        targetLang,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    setRecentTranslations(prev => [newTranslation, ...prev.slice(0, 9)]);
+                } catch (error) {
+                    setOutputText('خطأ في الترجمة. حاول مرة أخرى.');
+                } finally {
+                    setIsTranslating(false);
+                }
+            };
+            
+            const handleSwapLanguages = () => {
+                setSourceLang(targetLang);
+                setTargetLang(sourceLang);
+                setInputText(outputText);
+                setOutputText(inputText);
+            };
+            
+            const handleVoiceInput = () => {
+                if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                    alert('متصفحك لا يدعم الإدخال الصوتي');
+                    return;
+                }
+                
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = sourceLang === 'ar' ? 'ar-SA' : 'en-US';
+                
+                recognition.onstart = () => {
+                    console.log('بدء التسجيل الصوتي...');
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    setInputText(transcript);
+                };
+                
+                recognition.onerror = (event) => {
+                    console.error('خطأ في التعرف على الصوت:', event.error);
+                };
+                
+                recognition.start();
+            };
+            
+            const handleSpeak = (text, lang) => {
+                if (!text) return;
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = lang === 'ar' ? 'ar-SA' : 'en-US';
+                speechSynthesis.speak(utterance);
+            };
+            
+            return (
+                <div className="fade-in">
+                    <div className="glass-effect p-6 rounded-lg mb-6">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">الترجمة الفورية</h2>
+                        
+                        {/* Language Selection */}
+                        <div className="flex justify-center items-center gap-4 mb-6">
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={sourceLang}
+                                    onChange={(e) => setSourceLang(e.target.value)}
+                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                >
+                                    {languages.map(lang => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.flag} {lang.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <button
+                                onClick={handleSwapLanguages}
+                                className="p-2 bg-white bg-opacity-20 rounded-lg text-white hover:bg-opacity-30 transition-all"
+                            >
+                                🔄
+                            </button>
+                            
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={targetLang}
+                                    onChange={(e) => setTargetLang(e.target.value)}
+                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                >
+                                    {languages.map(lang => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.flag} {lang.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        {/* Translation Interface */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Input */}
+                            <div>
+                                <label className="block text-white mb-2">النص المراد ترجمته</label>
+                                <div className="relative">
+                                    <textarea
+                                        value={inputText}
+                                        onChange={(e) => setInputText(e.target.value)}
+                                        placeholder="اكتب النص هنا..."
+                                        className="w-full h-32 p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none"
+                                    />
+                                    <button
+                                        onClick={handleVoiceInput}
+                                        className="absolute bottom-2 left-2 p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                                    >
+                                        🎤
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => handleSpeak(inputText, sourceLang)}
+                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                                    disabled={!inputText}
+                                >
+                                    🔊 نطق
+                                </button>
+                            </div>
+                            
+                            {/* Output */}
+                            <div>
+                                <label className="block text-white mb-2">الترجمة</label>
+                                <div className="relative">
+                                    <textarea
+                                        value={outputText}
+                                        readOnly
+                                        placeholder="ستظهر الترجمة هنا..."
+                                        className="w-full h-32 p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none"
+                                    />
+                                    {isTranslating && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                            <div className="typing-indicator">
+                                                <div className="typing-dot"></div>
+                                                <div className="typing-dot"></div>
+                                                <div className="typing-dot"></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => handleSpeak(outputText, targetLang)}
+                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                                    disabled={!outputText}
+                                >
+                                    🔊 نطق
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Translate Button */}
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={handleTranslate}
+                                disabled={!inputText.trim() || isTranslating}
+                                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isTranslating ? 'جاري الترجمة...' : 'ترجم'}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Recent Translations */}
+                    {recentTranslations.length > 0 && (
+                        <div className="glass-effect p-6 rounded-lg">
+                            <h3 className="text-xl font-semibold text-white mb-4">الترجمات الأخيرة</h3>
+                            <div className="space-y-3">
+                                {recentTranslations.map(translation => (
+                                    <div key={translation.id} className="bg-white bg-opacity-10 p-4 rounded-lg">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-white font-medium">{translation.original}</span>
+                                            <span className="text-white opacity-60 text-sm">{translation.timestamp}</span>
+                                        </div>
+                                        <div className="text-white opacity-80">{translation.translated}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        
+        // Conversation Page Component
+        function ConversationPage() {
+            const [messages, setMessages] = useState([]);
+            const [inputMessage, setInputMessage] = useState('');
+            const [isTyping, setIsTyping] = useState(false);
+            const [sourceLang, setSourceLang] = useState('ar');
+            const [targetLang, setTargetLang] = useState('en');
+            const messagesEndRef = useRef(null);
+            
+            const languages = [
+                { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                { code: 'en', name: 'English', flag: '🇺🇸' },
+                { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                { code: 'es', name: 'Español', flag: '🇪🇸' }
+            ];
+            
+            const scrollToBottom = () => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            };
+            
+            useEffect(() => {
+                scrollToBottom();
+            }, [messages]);
+            
+            const handleSendMessage = async () => {
+                if (!inputMessage.trim()) return;
+                
+                const userMessage = {
+                    id: Date.now(),
+                    text: inputMessage,
+                    isUser: true,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                setMessages(prev => [...prev, userMessage]);
+                setInputMessage('');
+                setIsTyping(true);
+                
+                try {
+                    const translation = await MockTranslationService.translate(inputMessage, sourceLang, targetLang);
+                    
+                    const botMessage = {
+                        id: Date.now() + 1,
+                        text: translation,
+                        isUser: false,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    
+                    setMessages(prev => [...prev, botMessage]);
+                } catch (error) {
+                    const errorMessage = {
+                        id: Date.now() + 1,
+                        text: 'عذراً، حدث خطأ في الترجمة. حاول مرة أخرى.',
+                        isUser: false,
+                        timestamp: new Date().toLocaleTimeString()
+                    };
+                    setMessages(prev => [...prev, errorMessage]);
+                } finally {
+                    setIsTyping(false);
+                }
+            };
+            
+            const handleVoiceInput = () => {
+                if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                    alert('متصفحك لا يدعم الإدخال الصوتي');
+                    return;
+                }
+                
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = sourceLang === 'ar' ? 'ar-SA' : 'en-US';
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    setInputMessage(transcript);
+                };
+                
+                recognition.start();
+            };
+            
+            return (
+                <div className="fade-in">
+                    <div className="glass-effect p-6 rounded-lg mb-6">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">المحادثة الفورية</h2>
+                        
+                        {/* Language Selection */}
+                        <div className="flex justify-center items-center gap-4 mb-6">
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={sourceLang}
+                                    onChange={(e) => setSourceLang(e.target.value)}
+                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                >
+                                    {languages.map(lang => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.flag} {lang.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <span className="text-white">←</span>
+                            
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={targetLang}
+                                    onChange={(e) => setTargetLang(e.target.value)}
+                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                >
+                                    {languages.map(lang => (
+                                        <option key={lang.code} value={lang.code}>
+                                            {lang.flag} {lang.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Messages */}
+                    <div className="glass-effect p-6 rounded-lg mb-6" style={{height: '400px', overflowY: 'auto'}}>
+                        {messages.length === 0 ? (
+                            <div className="text-center text-white opacity-60">
+                                <div className="text-4xl mb-4">💬</div>
+                                <p>ابدأ محادثة جديدة...</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {messages.map(message => (
+                                    <div
+                                        key={message.id}
+                                        className={`message-bubble p-4 rounded-lg ${
+                                            message.isUser ? 'user-message' : 'bot-message'
+                                        }`}
+                                    >
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="font-medium">
+                                                {message.isUser ? 'أنت' : 'المترجم'}
+                                            </span>
+                                            <span className="text-sm opacity-60">{message.timestamp}</span>
+                                        </div>
+                                        <div>{message.text}</div>
+                                    </div>
+                                ))}
+                                
+                                {isTyping && (
+                                    <div className="bot-message message-bubble p-4 rounded-lg">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="font-medium">المترجم</span>
+                                            <span className="text-sm opacity-60">يكتب...</span>
+                                        </div>
+                                        <div className="typing-indicator">
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+                    
+                    {/* Input */}
+                    <div className="glass-effect p-6 rounded-lg">
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleVoiceInput}
+                                className="p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                            >
+                                🎤
+                            </button>
+                            <input
+                                type="text"
+                                value={inputMessage}
+                                onChange={(e) => setInputMessage(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                                placeholder="اكتب رسالتك هنا..."
+                                className="flex-1 p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60"
+                            />
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={!inputMessage.trim()}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                إرسال
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Settings Page Component
+        function SettingsPage() {
+            const [settings, setSettings] = useState({
+                theme: 'dark',
+                autoTranslate: true,
+                voiceEnabled: true,
+                notifications: true
+            });
+            
+            const handleSettingChange = (key, value) => {
+                setSettings(prev => ({ ...prev, [key]: value }));
+            };
+            
+            return (
+                <div className="fade-in">
+                    <div className="glass-effect p-6 rounded-lg">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">الإعدادات</h2>
+                        
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center">
+                                <span className="text-white">الترجمة التلقائية</span>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={settings.autoTranslate}
+                                        onChange={(e) => handleSettingChange('autoTranslate', e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                                <span className="text-white">تفعيل الصوت</span>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={settings.voiceEnabled}
+                                        onChange={(e) => handleSettingChange('voiceEnabled', e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                                <span className="text-white">الإشعارات</span>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={settings.notifications}
+                                        onChange={(e) => handleSettingChange('notifications', e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-8 text-center">
+                            <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
+                                حفظ الإعدادات
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Main App Component
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            
+            const renderPage = () => {
+                switch (currentPage) {
+                    case 'home':
+                        return <HomePage />;
+                    case 'translate':
+                        return <TranslationPage />;
+                    case 'conversation':
+                        return <ConversationPage />;
+                    case 'settings':
+                        return <SettingsPage />;
+                    default:
+                        return <HomePage />;
+                }
+            };
+            
+            return (
+                <div className="min-h-screen gradient-bg p-6">
+                    <div className="max-w-6xl mx-auto">
+                        <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+                        {renderPage()}
+                    </div>
+                </div>
+            );
+        }
+        
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
