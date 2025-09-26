@@ -1,365 +1,208 @@
-# ملفات النظام
-.DS_Store
-Thumbs.db
+# Logs
+logs
 *.log
-
-# ملفات التطوير
-node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# ملفات الإعدادات
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Production builds
+/build
+/dist
+/.next/
+/out/
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Snowpack dependency directory (https://snowpack.dev/)
+web_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+out
+
+# Nuxt.js build / generate output
+.nuxt
+dist
+
+# Gatsby files
+.cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# public
+
+# vuepress build output
+.vuepress/dist
+
+# vuepress v2.x temp and cache directory
+.temp
+.cache
+
+# Docusaurus cache and generated files
+.docusaurus
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# IntelliJ based IDEs
+.idea
+
+# Finder (MacOS)
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Vim
+*.swp
+*.swo
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+out/
+
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# ملفات البناء
-dist/
-build/
-*.tgz
-*.tar.gz
+# Temporary files
+tmp/
+temp/
 
-# ملفات IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ملفات مؤقتة
-*.tmp
-*.temp
+# Cache directories
 .cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
 
-# ملفات النسخ الاحتياطي
-*.bak
-*.backup
-*~
-
-# ملفات الاختبار
+# Coverage reports
 coverage/
-.nyc_output/
+*.lcov
 
-# ملفات PWA
-sw.js.map
-workbox-*.js
-
-# ملفات TypeScript
+# TypeScript
 *.tsbuildinfo
 
-# ملفات Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# Vite
+.vite/
 
-# ملفات Java
-*.class
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# ملفات C/C++
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.dylib
-
-# ملفات Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-go.work
-
-# ملفات Rust
-target/
-Cargo.lock
-
-# ملفات PHP
-vendor/
-composer.lock
-
-# ملفات Ruby
-Gemfile.lock
-.bundle/
-vendor/bundle/
-
-# ملفات .NET
-bin/
-obj/
-*.user
-*.suo
-*.cache
-*.dll
-*.exe
-*.pdb
-*.log
-
-# ملفات Docker
-.dockerignore
-Dockerfile
-docker-compose.yml
-docker-compose.yaml
-
-# ملفات Kubernetes
-*.yaml
-*.yml
-!package.yaml
-!package.yml
-
-# ملفات Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
-
-# ملفات Ansible
-*.retry
-
-# ملفات Vagrant
-.vagrant/
-
-# ملفات المطور
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ملفات Git
-.git/
-.gitignore
-
-# ملفات GitHub
-.github/
-
-# ملفات CI/CD
-.travis.yml
-.circleci/
-.github/workflows/
-
-# ملفات الاختبار
-test-results/
-playwright-report/
-test-results.xml
-
-# ملفات الأداء
-lighthouse-report.html
-*.lighthouse.html
-
-# ملفات الأمان
-*.pem
-*.key
-*.crt
-*.csr
-
-# ملفات النسخ الاحتياطي
-*.bak
-*.backup
-*~
-
-# ملفات مؤقتة
-*.tmp
-*.temp
-.cache/
-
-# ملفات النظام
-.DS_Store
-Thumbs.db
-*.log
-
-# ملفات التطوير
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# ملفات الإعدادات
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# ملفات البناء
-dist/
-build/
-*.tgz
-*.tar.gz
-
-# ملفات IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ملفات مؤقتة
-*.tmp
-*.temp
-.cache/
-
-# ملفات النسخ الاحتياطي
-*.bak
-*.backup
-*~
-
-# ملفات الاختبار
-coverage/
-.nyc_output/
-
-# ملفات PWA
-sw.js.map
+# PWA files
+sw.js
 workbox-*.js
-
-# ملفات TypeScript
-*.tsbuildinfo
-
-# ملفات Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# ملفات Java
-*.class
-*.jar
-*.war
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# ملفات C/C++
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.dylib
-
-# ملفات Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-go.work
-
-# ملفات Rust
-target/
-Cargo.lock
-
-# ملفات PHP
-vendor/
-composer.lock
-
-# ملفات Ruby
-Gemfile.lock
-.bundle/
-vendor/bundle/
-
-# ملفات .NET
-bin/
-obj/
-*.user
-*.suo
-*.cache
-*.dll
-*.exe
-*.pdb
-*.log
-
-# ملفات Docker
-.dockerignore
-Dockerfile
-docker-compose.yml
-docker-compose.yaml
-
-# ملفات Kubernetes
-*.yaml
-*.yml
-!package.yaml
-!package.yml
-
-# ملفات Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-.terraform.lock.hcl
-
-# ملفات Ansible
-*.retry
-
-# ملفات Vagrant
-.vagrant/
-
-# ملفات المطور
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ملفات Git
-.git/
-.gitignore
-
-# ملفات GitHub
-.github/
-
-# ملفات CI/CD
-.travis.yml
-.circleci/
-.github/workflows/
-
-# ملفات الاختبار
-test-results/
-playwright-report/
-test-results.xml
-
-# ملفات الأداء
-lighthouse-report.html
-*.lighthouse.html
-
-# ملفات الأمان
-*.pem
-*.key
-*.crt
-*.csr
-
-# ملفات النسخ الاحتياطي
-*.bak
-*.backup
-*~
-
-# ملفات مؤقتة
-*.tmp
-*.temp
-.cache/

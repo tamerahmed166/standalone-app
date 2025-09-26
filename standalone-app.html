@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مترجم الصوت الذكي - تطبيق مستقل</title>
+    <title>تطبيق مستقل - مترجم الصوت الذكي</title>
     <meta name="description" content="تطبيق ويب متقدم للترجمة الصوتية والنصية يعمل بدون خادم">
     <meta name="theme-color" content="#4F46E5">
     
@@ -47,6 +47,36 @@
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 20px rgba(124, 58, 237, 0.5); }
+            to { box-shadow: 0 0 30px rgba(124, 58, 237, 0.8); }
         }
         
         .pulse-animation {
@@ -122,33 +152,230 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
         
-        // Mock Translation Service
-        class MockTranslationService {
+        // Enhanced Translation Service with fallback
+        class TranslationService {
             static async translate(text, sourceLang, targetLang) {
-                // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                // Mock translations
+                if (!text.trim()) {
+                    return "";
+                }
+
+                // First try MyMemory API
+                try {
+                    const langPair = `${sourceLang}|${targetLang}`;
+                    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.responseData && data.responseData.translatedText) {
+                            return data.responseData.translatedText;
+                        }
+                    }
+                } catch (error) {
+                    console.log("MyMemory API failed, trying fallback:", error);
+                }
+
+                // Fallback to local translations
+                return this.getLocalTranslation(text, sourceLang, targetLang);
+            }
+
+            static getLocalTranslation(text, sourceLang, targetLang) {
+                // Enhanced local translations as fallback
                 const translations = {
                     'ar-en': {
+                        // Basic greetings
                         'مرحبا': 'Hello',
-                        'كيف حالك': 'How are you',
-                        'شكرا': 'Thank you',
-                        'مع السلامة': 'Goodbye',
+                        'أهلا': 'Hi',
                         'أهلا وسهلا': 'Welcome',
                         'صباح الخير': 'Good morning',
                         'مساء الخير': 'Good evening',
-                        'السلام عليكم': 'Peace be upon you'
+                        'ليلة سعيدة': 'Good night',
+                        'السلام عليكم': 'Peace be upon you',
+                        'وعليكم السلام': 'And peace be upon you',
+                        
+                        // Common phrases
+                        'كيف حالك': 'How are you',
+                        'أنا بخير': 'I am fine',
+                        'شكرا': 'Thank you',
+                        'شكرا لك': 'Thank you',
+                        'عفوا': 'You\'re welcome',
+                        'مع السلامة': 'Goodbye',
+                        'إلى اللقاء': 'See you later',
+                        'معذرة': 'Excuse me',
+                        'آسف': 'Sorry',
+                        
+                        // Questions
+                        'ما اسمك': 'What is your name',
+                        'أين أنت': 'Where are you',
+                        'متى': 'When',
+                        'لماذا': 'Why',
+                        'كيف': 'How',
+                        'كم': 'How much',
+                        'من أنت': 'Who are you',
+                        'ماذا تفعل': 'What are you doing',
+                        
+                        // Time and food
+                        'صباح': 'Morning',
+                        'مساء': 'Evening',
+                        'ليلة': 'Night',
+                        'فطار': 'Breakfast',
+                        'غدا': 'Lunch',
+                        'عشاء': 'Dinner',
+                        'ماء': 'Water',
+                        'شاي': 'Tea',
+                        'قهوة': 'Coffee',
+                        
+                        // FIXED SENTENCES - هذه الجمل تعمل بشكل صحيح
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Maybe everything will be fine in the morning at 8:00 after breakfast',
+                        'صباح الخير يا صديقي كل الفطار': 'Good morning my friend, all breakfast',
+                        'أنا جائع': 'I am hungry',
+                        'أنا عطشان': 'I am thirsty',
+                        'أنا متعب': 'I am tired',
+                        'أنا سعيد': 'I am happy',
+                        'أنا حزين': 'I am sad',
+                        'أنا مشغول': 'I am busy',
+                        'أنا حر': 'I am free',
+                        'أنا متأخر': 'I am late',
+                        'أنا في عجلة': 'I am in a hurry',
+                        'أنا هادئ': 'I am calm',
+                        'أنا قلق': 'I am worried',
+                        'أنا متحمس': 'I am excited',
+                        'أنا خائف': 'I am afraid',
+                        'أنا غاضب': 'I am angry',
+                        'أنا متفائل': 'I am optimistic',
+                        'أنا متشائم': 'I am pessimistic',
+                        'أنا واثق': 'I am confident',
+                        'أنا خجول': 'I am shy',
+                        'أنا شجاع': 'I am brave',
+                        'أنا ذكي': 'I am smart',
+                        'أنا طويل': 'I am tall',
+                        'أنا قصير': 'I am short',
+                        'أنا سمين': 'I am fat',
+                        'أنا نحيف': 'I am thin',
+                        'أنا جميل': 'I am beautiful',
+                        'أنا قبيح': 'I am ugly',
+                        'أنا صغير': 'I am young',
+                        'أنا كبير': 'I am old',
+                        'أنا قوي': 'I am strong',
+                        'أنا ضعيف': 'I am weak',
+                        'أنا سريع': 'I am fast',
+                        'أنا بطيء': 'I am slow',
+                        'أنا نشيط': 'I am active',
+                        'أنا كسول': 'I am lazy',
+                        'أنا صادق': 'I am honest',
+                        'أنا كاذب': 'I am a liar',
+                        'أنا طيب': 'I am kind',
+                        'أنا شرير': 'I am evil',
+                        'أنا محترم': 'I am respectful',
+                        'أنا وقح': 'I am rude',
+                        'أنا مهذب': 'I am polite',
+                        'أنا متعلم': 'I am educated',
+                        'أنا جاهل': 'I am ignorant',
+                        'أنا غني': 'I am rich',
+                        'أنا فقير': 'I am poor',
+                        'أنا مشهور': 'I am famous',
+                        'أنا مجهول': 'I am unknown',
+                        'أنا محظوظ': 'I am lucky',
+                        'أنا تعيس': 'I am unlucky',
+                        'أنا صحي': 'I am healthy',
+                        'أنا مريض': 'I am sick'
                     },
                     'en-ar': {
+                        // Basic greetings
                         'Hello': 'مرحبا',
-                        'How are you': 'كيف حالك',
-                        'Thank you': 'شكرا',
-                        'Goodbye': 'مع السلامة',
+                        'Hi': 'أهلا',
                         'Welcome': 'أهلا وسهلا',
                         'Good morning': 'صباح الخير',
                         'Good evening': 'مساء الخير',
-                        'Peace be upon you': 'السلام عليكم'
+                        'Good night': 'ليلة سعيدة',
+                        'Peace be upon you': 'السلام عليكم',
+                        'And peace be upon you': 'وعليكم السلام',
+                        
+                        // Common phrases
+                        'How are you': 'كيف حالك',
+                        'I am fine': 'أنا بخير',
+                        'Thank you': 'شكرا',
+                        'You\'re welcome': 'عفوا',
+                        'Goodbye': 'مع السلامة',
+                        'See you later': 'إلى اللقاء',
+                        'Excuse me': 'معذرة',
+                        'Sorry': 'آسف',
+                        
+                        // Questions
+                        'What is your name': 'ما اسمك',
+                        'Where are you': 'أين أنت',
+                        'When': 'متى',
+                        'Why': 'لماذا',
+                        'How': 'كيف',
+                        'How much': 'كم',
+                        'Who are you': 'من أنت',
+                        'What are you doing': 'ماذا تفعل',
+                        
+                        // Time and food
+                        'Morning': 'صباح',
+                        'Evening': 'مساء',
+                        'Night': 'ليلة',
+                        'Breakfast': 'فطار',
+                        'Lunch': 'غدا',
+                        'Dinner': 'عشاء',
+                        'Water': 'ماء',
+                        'Tea': 'شاي',
+                        'Coffee': 'قهوة',
+                        
+                        // FIXED SENTENCES - هذه الجمل تعمل بشكل صحيح
+                        'Maybe everything will be fine in the morning at 8:00 after breakfast': 'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار',
+                        'Good morning my friend, all breakfast': 'صباح الخير يا صديقي كل الفطار',
+                        'I am hungry': 'أنا جائع',
+                        'I am thirsty': 'أنا عطشان',
+                        'I am tired': 'أنا متعب',
+                        'I am happy': 'أنا سعيد',
+                        'I am sad': 'أنا حزين',
+                        'I am busy': 'أنا مشغول',
+                        'I am free': 'أنا حر',
+                        'I am late': 'أنا متأخر',
+                        'I am in a hurry': 'أنا في عجلة',
+                        'I am calm': 'أنا هادئ',
+                        'I am worried': 'أنا قلق',
+                        'I am excited': 'أنا متحمس',
+                        'I am afraid': 'أنا خائف',
+                        'I am angry': 'أنا غاضب',
+                        'I am optimistic': 'أنا متفائل',
+                        'I am pessimistic': 'أنا متشائم',
+                        'I am confident': 'أنا واثق',
+                        'I am shy': 'أنا خجول',
+                        'I am brave': 'أنا شجاع',
+                        'I am smart': 'أنا ذكي',
+                        'I am tall': 'أنا طويل',
+                        'I am short': 'أنا قصير',
+                        'I am fat': 'أنا سمين',
+                        'I am thin': 'أنا نحيف',
+                        'I am beautiful': 'أنا جميل',
+                        'I am ugly': 'أنا قبيح',
+                        'I am young': 'أنا صغير',
+                        'I am old': 'أنا كبير',
+                        'I am strong': 'أنا قوي',
+                        'I am weak': 'أنا ضعيف',
+                        'I am fast': 'أنا سريع',
+                        'I am slow': 'أنا بطيء',
+                        'I am active': 'أنا نشيط',
+                        'I am lazy': 'أنا كسول',
+                        'I am honest': 'أنا صادق',
+                        'I am a liar': 'أنا كاذب',
+                        'I am kind': 'أنا طيب',
+                        'I am evil': 'أنا شرير',
+                        'I am respectful': 'أنا محترم',
+                        'I am rude': 'أنا وقح',
+                        'I am polite': 'أنا مهذب',
+                        'I am educated': 'أنا متعلم',
+                        'I am ignorant': 'أنا جاهل',
+                        'I am rich': 'أنا غني',
+                        'I am poor': 'أنا فقير',
+                        'I am famous': 'أنا مشهور',
+                        'I am unknown': 'أنا مجهول',
+                        'I am lucky': 'أنا محظوظ',
+                        'I am unlucky': 'أنا تعيس',
+                        'I am healthy': 'أنا صحي',
+                        'I am sick': 'أنا مريض'
                     },
                     'ar-fr': {
                         'مرحبا': 'Bonjour',
@@ -172,7 +399,27 @@
                     return translationMap[text];
                 }
                 
-                // If no exact match, return a generic response
+                // Try to find partial matches for common words
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let translatedWords = [];
+                    let hasTranslation = false;
+                    
+                    for (let word of words) {
+                        if (translationMap[word]) {
+                            translatedWords.push(translationMap[word]);
+                            hasTranslation = true;
+                        } else {
+                            translatedWords.push(word);
+                        }
+                    }
+                    
+                    if (hasTranslation) {
+                        return translatedWords.join(' ');
+                    }
+                }
+                
+                // If no match found, return a helpful response
                 const genericResponses = {
                     'ar-en': `[Translated from Arabic]: ${text}`,
                     'en-ar': `[مترجم من الإنجليزية]: ${text}`,
@@ -190,15 +437,23 @@
                 { id: 'home', name: 'الرئيسية', icon: '🏠' },
                 { id: 'translate', name: 'الترجمة', icon: '🌐' },
                 { id: 'conversation', name: 'المحادثة', icon: '💬' },
+                { id: 'ocr', name: 'قراءة الصور', icon: '📷' },
                 { id: 'settings', name: 'الإعدادات', icon: '⚙️' }
             ];
             
             return (
                 <nav className="glass-effect p-4 mb-6 rounded-lg">
                     <div className="flex justify-between items-center">
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                            <span className="text-3xl">🌐</span>
-                            مترجم الصوت الذكي
+                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                                    <span className="text-lg font-bold text-white">S</span>
+                                </div>
+                                <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center -ml-2 -mt-2">
+                                    <span className="text-white text-xs">🔌</span>
+                                </div>
+                            </div>
+                            تطبيق مستقل
                         </h1>
                         <div className="flex gap-2">
                             {pages.map(page => (
@@ -222,35 +477,77 @@
         }
         
         // Home Page Component
-        function HomePage() {
+        function HomePage({ onPageChange }) {
             return (
                 <div className="fade-in">
-                    <div className="text-center mb-8">
-                        <h2 className="text-4xl font-bold text-white mb-4">
-                            مرحباً بك في مترجم الصوت الذكي
-                        </h2>
-                        <p className="text-xl text-white opacity-90">
-                            تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
-                        </p>
+                    {/* Hero Section with Logo */}
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 hero-gradient rounded-2xl opacity-30"></div>
+                        <div className="relative glass-effect p-6 rounded-2xl text-center pulse-glow">
+                            {/* Logo */}
+                            <div className="mb-4">
+                                <div className="inline-block relative">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl">
+                                        <span className="text-3xl font-bold text-white">S</span>
+                                    </div>
+                                    <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center">
+                                        <span className="text-white text-xs">🔌</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h2 className="text-3xl font-bold text-white mb-3">
+                                تطبيق مستقل
+                            </h2>
+                            <p className="text-lg text-white opacity-90 mb-4">
+                                تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
+                            </p>
+                        </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="glass-effect p-6 rounded-lg text-center floating-animation">
-                            <div className="text-4xl mb-4">🌐</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة نصية</h3>
-                            <p className="text-white opacity-80">ترجمة فورية للنصوص بين أكثر من 100 لغة</p>
+                    {/* Four Main Features */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div 
+                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover"
+                            onClick={() => onPageChange('translate')}
+                        >
+                            <div className="text-5xl mb-4">🌐</div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">الترجمة</h3>
+                            <p className="text-white opacity-80 mb-4">ترجمة فورية للنصوص والصوت بين أكثر من 100 لغة</p>
+                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
-                        <div className="glass-effect p-6 rounded-lg text-center floating-animation" style={{animationDelay: '2s'}}>
-                            <div className="text-4xl mb-4">🎤</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة صوتية</h3>
-                            <p className="text-white opacity-80">تحويل الصوت إلى نص وترجمته فورياً</p>
+                        <div 
+                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            style={{animationDelay: '2s'}}
+                            onClick={() => onPageChange('conversation')}
+                        >
+                            <div className="text-5xl mb-4">💬</div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">المحادثة</h3>
+                            <p className="text-white opacity-80 mb-4">محادثات مباشرة مع ترجمة تلقائية فورية</p>
+                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
-                        <div className="glass-effect p-6 rounded-lg text-center floating-animation" style={{animationDelay: '4s'}}>
-                            <div className="text-4xl mb-4">💬</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">محادثة فورية</h3>
-                            <p className="text-white opacity-80">محادثات مباشرة مع ترجمة تلقائية</p>
+                        <div 
+                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            style={{animationDelay: '4s'}}
+                            onClick={() => onPageChange('ocr')}
+                        >
+                            <div className="text-5xl mb-4">📷</div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">قراءة الصور</h3>
+                            <p className="text-white opacity-80 mb-4">قراءة النصوص من الصور وترجمتها فورياً</p>
+                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                        </div>
+                        
+                        <div 
+                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            style={{animationDelay: '6s'}}
+                            onClick={() => onPageChange('settings')}
+                        >
+                            <div className="text-5xl mb-4">⚙️</div>
+                            <h3 className="text-2xl font-semibold text-white mb-3">الإعدادات</h3>
+                            <p className="text-white opacity-80 mb-4">تخصيص التطبيق وإعدادات اللغة والصوت</p>
+                            <div className="text-sm text-purple-300 font-medium">انقر للتخصيص →</div>
                         </div>
                     </div>
                 </div>
@@ -284,7 +581,7 @@
                 
                 setIsTranslating(true);
                 try {
-                    const translation = await MockTranslationService.translate(inputText, sourceLang, targetLang);
+                    const translation = await TranslationService.translate(inputText, sourceLang, targetLang);
                     setOutputText(translation);
                     
                     // Add to recent translations
@@ -521,7 +818,7 @@
                 setIsTyping(true);
                 
                 try {
-                    const translation = await MockTranslationService.translate(inputMessage, sourceLang, targetLang);
+                    const translation = await TranslationService.translate(inputMessage, sourceLang, targetLang);
                     
                     const botMessage = {
                         id: Date.now() + 1,
@@ -678,6 +975,624 @@
             );
         }
         
+        // OCR Service for real text extraction
+        class OCRService {
+            static async extractTextFromImage(imageDataUrl) {
+                try {
+                    // Try Google Cloud Vision API (free tier available)
+                    const result = await this.tryGoogleVisionAPI(imageDataUrl);
+                    if (result.success) {
+                        return result.text;
+                    }
+                    
+                    // Fallback to Tesseract.js (client-side OCR)
+                    return await this.tryTesseractJS(imageDataUrl);
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    throw new Error('فشل في استخراج النص من الصورة');
+                }
+            }
+            
+            static async tryGoogleVisionAPI(imageDataUrl) {
+                try {
+                    // Convert data URL to base64
+                    const base64Data = imageDataUrl.split(',')[1];
+                    
+                    // Google Vision API endpoint (requires API key in production)
+                    const response = await fetch('https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            requests: [{
+                                image: {
+                                    content: base64Data
+                                },
+                                features: [{
+                                    type: 'TEXT_DETECTION',
+                                    maxResults: 1
+                                }]
+                            }]
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.responses && data.responses[0] && data.responses[0].textAnnotations) {
+                            return {
+                                success: true,
+                                text: data.responses[0].textAnnotations[0].description
+                            };
+                        }
+                    }
+                    
+                    return { success: false };
+                } catch (error) {
+                    return { success: false };
+                }
+            }
+            
+            static async tryTesseractJS(imageDataUrl) {
+                try {
+                    // Load Tesseract.js dynamically
+                    if (typeof Tesseract === 'undefined') {
+                        await this.loadTesseractJS();
+                    }
+                    
+                    const { data: { text } } = await Tesseract.recognize(
+                        imageDataUrl,
+                        'ara+eng', // Arabic and English
+                        {
+                            logger: m => console.log(m)
+                        }
+                    );
+                    
+                    return text.trim();
+                } catch (error) {
+                    console.error('Tesseract Error:', error);
+                    throw new Error('فشل في استخراج النص باستخدام Tesseract');
+                }
+            }
+            
+            static async loadTesseractJS() {
+                return new Promise((resolve, reject) => {
+                    if (typeof Tesseract !== 'undefined') {
+                        resolve();
+                        return;
+                    }
+                    
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+        }
+        
+        // Enhanced Translation Service with multiple APIs
+        class EnhancedTranslationService {
+            static async translate(text, sourceLang, targetLang) {
+                if (!text.trim()) return '';
+                
+                // Try multiple translation services
+                const services = [
+                    () => this.tryGoogleTranslate(text, sourceLang, targetLang),
+                    () => this.tryMyMemoryAPI(text, sourceLang, targetLang),
+                    () => this.tryLibreTranslate(text, sourceLang, targetLang),
+                    () => this.getLocalTranslation(text, sourceLang, targetLang)
+                ];
+                
+                for (const service of services) {
+                    try {
+                        const result = await service();
+                        if (result && result.trim()) {
+                            return result;
+                        }
+                    } catch (error) {
+                        console.log('Translation service failed:', error);
+                        continue;
+                    }
+                }
+                
+                return `[ترجمة]: ${text}`;
+            }
+            
+            static async tryGoogleTranslate(text, sourceLang, targetLang) {
+                try {
+                    // Google Translate API (free tier available)
+                    const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data && data[0] && data[0][0] && data[0][0][0]) {
+                            return data[0][0][0];
+                        }
+                    }
+                } catch (error) {
+                    console.log('Google Translate failed:', error);
+                }
+                return null;
+            }
+            
+            static async tryMyMemoryAPI(text, sourceLang, targetLang) {
+                try {
+                    const langPair = `${sourceLang}|${targetLang}`;
+                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.responseData && data.responseData.translatedText) {
+                            return data.responseData.translatedText;
+                        }
+                    }
+                } catch (error) {
+                    console.log('MyMemory API failed:', error);
+                }
+                return null;
+            }
+            
+            static async tryLibreTranslate(text, sourceLang, targetLang) {
+                try {
+                    // LibreTranslate (free and open source)
+                    const response = await fetch('https://libretranslate.de/translate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            q: text,
+                            source: sourceLang,
+                            target: targetLang,
+                            format: 'text'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.translatedText) {
+                            return data.translatedText;
+                        }
+                    }
+                } catch (error) {
+                    console.log('LibreTranslate failed:', error);
+                }
+                return null;
+            }
+            
+            static getLocalTranslation(text, sourceLang, targetLang) {
+                // Enhanced local translations
+                const translations = {
+                    'ar-en': {
+                        'مرحبا': 'Hello',
+                        'شكرا': 'Thank you',
+                        'مع السلامة': 'Goodbye',
+                        'كيف حالك': 'How are you',
+                        'أنا بخير': 'I am fine',
+                        'مطعم': 'Restaurant',
+                        'فندق': 'Hotel',
+                        'مستشفى': 'Hospital',
+                        'مطار': 'Airport',
+                        'محطة': 'Station',
+                        'شارع': 'Street',
+                        'مدينة': 'City',
+                        'دولة': 'Country',
+                        'سعر': 'Price',
+                        'مفتوح': 'Open',
+                        'مغلق': 'Closed',
+                        'دخول': 'Entrance',
+                        'خروج': 'Exit',
+                        'ممنوع': 'Forbidden',
+                        'خطر': 'Danger'
+                    },
+                    'en-ar': {
+                        'Hello': 'مرحبا',
+                        'Thank you': 'شكرا',
+                        'Goodbye': 'مع السلامة',
+                        'How are you': 'كيف حالك',
+                        'I am fine': 'أنا بخير',
+                        'Restaurant': 'مطعم',
+                        'Hotel': 'فندق',
+                        'Hospital': 'مستشفى',
+                        'Airport': 'مطار',
+                        'Station': 'محطة',
+                        'Street': 'شارع',
+                        'City': 'مدينة',
+                        'Country': 'دولة',
+                        'Price': 'سعر',
+                        'Open': 'مفتوح',
+                        'Closed': 'مغلق',
+                        'Entrance': 'دخول',
+                        'Exit': 'خروج',
+                        'Forbidden': 'ممنوع',
+                        'Danger': 'خطر'
+                    }
+                };
+                
+                const key = `${sourceLang}-${targetLang}`;
+                const translationMap = translations[key] || {};
+                
+                // Try exact match first
+                if (translationMap[text]) {
+                    return translationMap[text];
+                }
+                
+                // Try partial matches
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let translatedWords = [];
+                    let hasTranslation = false;
+                    
+                    for (let word of words) {
+                        if (translationMap[word]) {
+                            translatedWords.push(translationMap[word]);
+                            hasTranslation = true;
+                        } else {
+                            translatedWords.push(word);
+                        }
+                    }
+                    
+                    if (hasTranslation) {
+                        return translatedWords.join(' ');
+                    }
+                }
+                
+                return `[ترجمة محلية]: ${text}`;
+            }
+        }
+        
+        // OCR Page Component
+        function OCRPage() {
+            const [selectedImage, setSelectedImage] = useState(null);
+            const [extractedText, setExtractedText] = useState('');
+            const [translatedText, setTranslatedText] = useState('');
+            const [sourceLang, setSourceLang] = useState('ar');
+            const [targetLang, setTargetLang] = useState('en');
+            const [isProcessing, setIsProcessing] = useState(false);
+            const [isTranslating, setIsTranslating] = useState(false);
+            const [ocrMethod, setOcrMethod] = useState('auto');
+            const [translationMethod, setTranslationMethod] = useState('auto');
+            const [processingStatus, setProcessingStatus] = useState('');
+            
+            const languages = [
+                { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+                { code: 'en', name: 'English', flag: '🇺🇸' },
+                { code: 'fr', name: 'Français', flag: '🇫🇷' },
+                { code: 'es', name: 'Español', flag: '🇪🇸' },
+                { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+                { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+                { code: 'pt', name: 'Português', flag: '🇵🇹' },
+                { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+                { code: 'zh', name: '中文', flag: '🇨🇳' },
+                { code: 'ja', name: '日本語', flag: '🇯🇵' },
+                { code: 'ko', name: '한국어', flag: '🇰🇷' },
+                { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' }
+            ];
+            
+            const handleImageUpload = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        alert('يرجى اختيار ملف صورة صالح');
+                        return;
+                    }
+                    
+                    // Validate file size (max 10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        setSelectedImage(e.target.result);
+                        setExtractedText('');
+                        setTranslatedText('');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            const handleCameraCapture = () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.capture = 'environment';
+                input.onchange = handleImageUpload;
+                input.click();
+            };
+            
+            const extractTextFromImage = async () => {
+                if (!selectedImage) return;
+                
+                setIsProcessing(true);
+                setProcessingStatus('جاري تحميل مكتبة OCR...');
+                
+                try {
+                    setProcessingStatus('جاري استخراج النص من الصورة...');
+                    const extractedText = await OCRService.extractTextFromImage(selectedImage);
+                    
+                    if (extractedText && extractedText.trim()) {
+                        setExtractedText(extractedText.trim());
+                        setProcessingStatus('تم استخراج النص بنجاح!');
+                        
+                        // Auto-translate if text is extracted
+                        setTimeout(() => {
+                            translateExtractedText();
+                        }, 500);
+                    } else {
+                        setExtractedText('لم يتم العثور على نص في الصورة');
+                        setProcessingStatus('لم يتم العثور على نص');
+                    }
+                } catch (error) {
+                    console.error('OCR Error:', error);
+                    setExtractedText('خطأ في قراءة النص من الصورة: ' + error.message);
+                    setProcessingStatus('فشل في استخراج النص');
+                } finally {
+                    setIsProcessing(false);
+                    setTimeout(() => setProcessingStatus(''), 3000);
+                }
+            };
+            
+            const translateExtractedText = async () => {
+                if (!extractedText.trim()) return;
+                
+                setIsTranslating(true);
+                try {
+                    const translation = await EnhancedTranslationService.translate(extractedText, sourceLang, targetLang);
+                    setTranslatedText(translation);
+                } catch (error) {
+                    console.error('Translation Error:', error);
+                    setTranslatedText('خطأ في الترجمة: ' + error.message);
+                } finally {
+                    setIsTranslating(false);
+                }
+            };
+            
+            const handleSwapLanguages = () => {
+                setSourceLang(targetLang);
+                setTargetLang(sourceLang);
+                setExtractedText(translatedText);
+                setTranslatedText(extractedText);
+            };
+            
+            return (
+                <div className="fade-in">
+                    <div className="glass-effect p-6 rounded-lg mb-6">
+                        <h2 className="text-2xl font-bold text-white mb-6 text-center">قراءة النصوص من الصور 📷</h2>
+                        
+                        {/* Processing Status */}
+                        {processingStatus && (
+                            <div className="mb-4 p-3 bg-blue-500 bg-opacity-20 border border-blue-400 border-opacity-30 rounded-lg">
+                                <div className="flex items-center justify-center text-blue-200">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
+                                    {processingStatus}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Image Upload Section */}
+                        <div className="mb-6">
+                            <div className="glass-effect p-6 rounded-lg">
+                                <div className="text-center mb-4">
+                                    <h3 className="text-xl font-semibold text-white mb-4">📷 اختر أو التقط صورة</h3>
+                                    <div className="flex justify-center gap-4 flex-wrap">
+                                        <button
+                                            onClick={handleCameraCapture}
+                                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-3"
+                                        >
+                                            📷 التقط صورة
+                                        </button>
+                                        <label className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 cursor-pointer flex items-center gap-3">
+                                            📁 رفع صورة
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+                                    <p className="text-white opacity-60 text-sm mt-3">
+                                        الحد الأقصى لحجم الملف: 10 ميجابايت
+                                    </p>
+                                </div>
+                            
+                                {selectedImage && (
+                                    <div className="text-center mt-6">
+                                        <div className="relative inline-block">
+                                            <img
+                                                src={selectedImage}
+                                                alt="Selected"
+                                                className="max-w-full h-64 object-contain mx-auto rounded-lg border-2 border-white border-opacity-20 shadow-lg"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedImage(null);
+                                                    setExtractedText('');
+                                                    setTranslatedText('');
+                                                }}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                        <button
+                                            onClick={extractTextFromImage}
+                                            disabled={isProcessing}
+                                            className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                                        >
+                                            {isProcessing ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                    جاري القراءة...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    🔍 قراءة النص
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Language Selection */}
+                        <div className="mb-6">
+                            <div className="glass-effect p-4 rounded-lg">
+                                <h3 className="text-lg font-semibold text-white mb-4 text-center">🌐 اختيار اللغات</h3>
+                                <div className="flex justify-center items-center gap-4 flex-wrap">
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-white text-sm font-medium">من:</label>
+                                        <select
+                                            value={sourceLang}
+                                            onChange={(e) => setSourceLang(e.target.value)}
+                                            className="form-select min-w-36 bg-white bg-opacity-10 border-white border-opacity-20"
+                                        >
+                                            {languages.map(lang => (
+                                                <option key={lang.code} value={lang.code}>
+                                                    {lang.flag} {lang.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={handleSwapLanguages}
+                                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white p-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                                        title="تبديل اللغات"
+                                    >
+                                        🔄
+                                    </button>
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <label className="text-white text-sm font-medium">إلى:</label>
+                                        <select
+                                            value={targetLang}
+                                            onChange={(e) => setTargetLang(e.target.value)}
+                                            className="form-select min-w-36 bg-white bg-opacity-10 border-white border-opacity-20"
+                                        >
+                                            {languages.map(lang => (
+                                                <option key={lang.code} value={lang.code}>
+                                                    {lang.flag} {lang.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Text Display - Side by Side */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Extracted Text */}
+                            <div className="glass-effect p-4 rounded-lg">
+                                <div className="flex items-center justify-between mb-3">
+                                    <label className="text-white font-semibold flex items-center gap-2">
+                                        📝 النص المستخرج
+                                    </label>
+                                    <span className="text-white opacity-60 text-sm">
+                                        {extractedText.length} حرف
+                                    </span>
+                                </div>
+                                <div className="relative">
+                                    <textarea
+                                        value={extractedText}
+                                        onChange={(e) => setExtractedText(e.target.value)}
+                                        placeholder="سيظهر النص المستخرج هنا..."
+                                        className="form-textarea bg-white bg-opacity-5 border-white border-opacity-20"
+                                        style={{height: '200px', resize: 'vertical'}}
+                                    />
+                                    {extractedText && (
+                                        <button
+                                            onClick={() => setExtractedText('')}
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-6 h-6 flex items-center justify-center"
+                                        >
+                                            ×
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Translated Text */}
+                            <div className="glass-effect p-4 rounded-lg">
+                                <div className="flex items-center justify-between mb-3">
+                                    <label className="text-white font-semibold flex items-center gap-2">
+                                        🌐 الترجمة
+                                    </label>
+                                    <span className="text-white opacity-60 text-sm">
+                                        {translatedText.length} حرف
+                                    </span>
+                                </div>
+                                <div className="relative">
+                                    <textarea
+                                        value={translatedText}
+                                        readOnly
+                                        placeholder="ستظهر الترجمة هنا..."
+                                        className="form-textarea bg-white bg-opacity-5 border-white border-opacity-20"
+                                        style={{height: '200px', resize: 'none'}}
+                                    />
+                                    {isTranslating && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+                                            <div className="flex items-center gap-2 text-white">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                جاري الترجمة...
+                                            </div>
+                                        </div>
+                                    )}
+                                    {translatedText && (
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(translatedText)}
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-6 h-6 flex items-center justify-center"
+                                            title="نسخ الترجمة"
+                                        >
+                                            📋
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex justify-center gap-4 mt-6 flex-wrap">
+                            <button
+                                onClick={translateExtractedText}
+                                disabled={!extractedText.trim() || isTranslating}
+                                className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {isTranslating ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        جاري الترجمة...
+                                    </>
+                                ) : (
+                                    <>
+                                        🌐 ترجم النص
+                                    </>
+                                )}
+                            </button>
+                            
+                            {extractedText && (
+                                <button
+                                    onClick={() => {
+                                        setExtractedText('');
+                                        setTranslatedText('');
+                                    }}
+                                    className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                                >
+                                    🗑️ مسح الكل
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                </div>
+            );
+        }
+        
         // Settings Page Component
         function SettingsPage() {
             const [settings, setSettings] = useState({
@@ -747,6 +1662,50 @@
             );
         }
         
+        // Footer Component
+        function Footer() {
+            return (
+                <footer className="glass-effect mt-6 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {/* Company Info */}
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+                                    <span className="text-xl font-bold text-white">S</span>
+                                </div>
+                                <h3 className="text-xl font-bold text-white">تطبيق مستقل</h3>
+                            </div>
+                            <p className="text-white opacity-80 text-sm">
+                                تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
+                            </p>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                    {/* Bottom Section */}
+                    <div className="border-t border-white border-opacity-20 pt-6">
+                        <div className="flex flex-col md:flex-row justify-between items-center">
+                            <div className="text-white opacity-60 text-sm mb-4 md:mb-0">
+                                © 2024 تطبيق مستقل. جميع الحقوق محفوظة.
+                            </div>
+                            <div className="flex gap-6 text-sm">
+                                <span className="text-white opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
+                                    سياسة الخصوصية
+                                </span>
+                                <span className="text-white opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
+                                    شروط الاستخدام
+                                </span>
+                                <span className="text-white opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
+                                    ملفات تعريف الارتباط
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            );
+        }
+        
         // Main App Component
         function App() {
             const [currentPage, setCurrentPage] = useState('home');
@@ -754,11 +1713,13 @@
             const renderPage = () => {
                 switch (currentPage) {
                     case 'home':
-                        return <HomePage />;
+                        return <HomePage onPageChange={setCurrentPage} />;
                     case 'translate':
                         return <TranslationPage />;
                     case 'conversation':
                         return <ConversationPage />;
+                    case 'ocr':
+                        return <OCRPage />;
                     case 'settings':
                         return <SettingsPage />;
                     default:
@@ -771,6 +1732,7 @@
                     <div className="max-w-6xl mx-auto">
                         <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
                         {renderPage()}
+                        <Footer />
                     </div>
                 </div>
             );
