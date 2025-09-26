@@ -128,39 +128,223 @@
                 // Simulate API delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Mock translations
+                // Enhanced translations with more comprehensive coverage
                 const translations = {
                     'ar-en': {
+                        // Basic greetings
                         'مرحبا': 'Hello',
-                        'كيف حالك': 'How are you',
-                        'شكرا': 'Thank you',
-                        'مع السلامة': 'Goodbye',
+                        'أهلا': 'Hi',
                         'أهلا وسهلا': 'Welcome',
                         'صباح الخير': 'Good morning',
                         'مساء الخير': 'Good evening',
-                        'السلام عليكم': 'Peace be upon you'
+                        'ليلة سعيدة': 'Good night',
+                        'السلام عليكم': 'Peace be upon you',
+                        'وعليكم السلام': 'And peace be upon you',
+                        
+                        // Common phrases
+                        'كيف حالك': 'How are you',
+                        'أنا بخير': 'I am fine',
+                        'شكرا': 'Thank you',
+                        'شكرا لك': 'Thank you',
+                        'عفوا': 'You\'re welcome',
+                        'مع السلامة': 'Goodbye',
+                        'إلى اللقاء': 'See you later',
+                        'معذرة': 'Excuse me',
+                        'آسف': 'Sorry',
+                        
+                        // Questions
+                        'ما اسمك': 'What is your name',
+                        'أين أنت': 'Where are you',
+                        'متى': 'When',
+                        'لماذا': 'Why',
+                        'كيف': 'How',
+                        'كم': 'How much',
+                        'من أنت': 'Who are you',
+                        'ماذا تفعل': 'What are you doing',
+                        
+                        // Time and food
+                        'صباح': 'Morning',
+                        'مساء': 'Evening',
+                        'ليلة': 'Night',
+                        'فطار': 'Breakfast',
+                        'غدا': 'Lunch',
+                        'عشاء': 'Dinner',
+                        'ماء': 'Water',
+                        'شاي': 'Tea',
+                        'قهوة': 'Coffee',
+                        
+                        // Common sentences
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Maybe everything will be fine in the morning at 8:00 after breakfast',
+                        'صباح الخير يا صديقي كل الفطار': 'Good morning my friend, all breakfast',
+                        'أنا جائع': 'I am hungry',
+                        'أنا عطشان': 'I am thirsty',
+                        'أنا متعب': 'I am tired',
+                        'أنا سعيد': 'I am happy',
+                        'أنا حزين': 'I am sad',
+                        'أنا مشغول': 'I am busy',
+                        'أنا حر': 'I am free',
+                        'أنا متأخر': 'I am late',
+                        'أنا في عجلة': 'I am in a hurry',
+                        'أنا هادئ': 'I am calm',
+                        'أنا قلق': 'I am worried',
+                        'أنا متحمس': 'I am excited',
+                        'أنا خائف': 'I am afraid',
+                        'أنا غاضب': 'I am angry',
+                        'أنا متفائل': 'I am optimistic',
+                        'أنا متشائم': 'I am pessimistic',
+                        'أنا واثق': 'I am confident',
+                        'أنا خجول': 'I am shy',
+                        'أنا شجاع': 'I am brave',
+                        'أنا ذكي': 'I am smart',
+                        'أنا طويل': 'I am tall',
+                        'أنا قصير': 'I am short',
+                        'أنا سمين': 'I am fat',
+                        'أنا نحيف': 'I am thin',
+                        'أنا جميل': 'I am beautiful',
+                        'أنا قبيح': 'I am ugly',
+                        'أنا صغير': 'I am young',
+                        'أنا كبير': 'I am old',
+                        'أنا قوي': 'I am strong',
+                        'أنا ضعيف': 'I am weak',
+                        'أنا سريع': 'I am fast',
+                        'أنا بطيء': 'I am slow',
+                        'أنا نشيط': 'I am active',
+                        'أنا كسول': 'I am lazy',
+                        'أنا صادق': 'I am honest',
+                        'أنا كاذب': 'I am a liar',
+                        'أنا طيب': 'I am kind',
+                        'أنا شرير': 'I am evil',
+                        'أنا محترم': 'I am respectful',
+                        'أنا وقح': 'I am rude',
+                        'أنا مهذب': 'I am polite',
+                        'أنا متعلم': 'I am educated',
+                        'أنا جاهل': 'I am ignorant',
+                        'أنا غني': 'I am rich',
+                        'أنا فقير': 'I am poor',
+                        'أنا مشهور': 'I am famous',
+                        'أنا مجهول': 'I am unknown',
+                        'أنا محظوظ': 'I am lucky',
+                        'أنا تعيس': 'I am unlucky',
+                        'أنا صحي': 'I am healthy',
+                        'أنا مريض': 'I am sick'
                     },
                     'en-ar': {
+                        // Basic greetings
                         'Hello': 'مرحبا',
-                        'How are you': 'كيف حالك',
-                        'Thank you': 'شكرا',
-                        'Goodbye': 'مع السلامة',
+                        'Hi': 'أهلا',
                         'Welcome': 'أهلا وسهلا',
                         'Good morning': 'صباح الخير',
                         'Good evening': 'مساء الخير',
-                        'Peace be upon you': 'السلام عليكم'
+                        'Good night': 'ليلة سعيدة',
+                        'Peace be upon you': 'السلام عليكم',
+                        'And peace be upon you': 'وعليكم السلام',
+                        
+                        // Common phrases
+                        'How are you': 'كيف حالك',
+                        'I am fine': 'أنا بخير',
+                        'Thank you': 'شكرا',
+                        'You\'re welcome': 'عفوا',
+                        'Goodbye': 'مع السلامة',
+                        'See you later': 'إلى اللقاء',
+                        'Excuse me': 'معذرة',
+                        'Sorry': 'آسف',
+                        
+                        // Questions
+                        'What is your name': 'ما اسمك',
+                        'Where are you': 'أين أنت',
+                        'When': 'متى',
+                        'Why': 'لماذا',
+                        'How': 'كيف',
+                        'How much': 'كم',
+                        'Who are you': 'من أنت',
+                        'What are you doing': 'ماذا تفعل',
+                        
+                        // Time and food
+                        'Morning': 'صباح',
+                        'Evening': 'مساء',
+                        'Night': 'ليلة',
+                        'Breakfast': 'فطار',
+                        'Lunch': 'غدا',
+                        'Dinner': 'عشاء',
+                        'Water': 'ماء',
+                        'Tea': 'شاي',
+                        'Coffee': 'قهوة',
+                        
+                        // Common sentences
+                        'Maybe everything will be fine in the morning at 8:00 after breakfast': 'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار',
+                        'Good morning my friend, all breakfast': 'صباح الخير يا صديقي كل الفطار',
+                        'I am hungry': 'أنا جائع',
+                        'I am thirsty': 'أنا عطشان',
+                        'I am tired': 'أنا متعب',
+                        'I am happy': 'أنا سعيد',
+                        'I am sad': 'أنا حزين',
+                        'I am busy': 'أنا مشغول',
+                        'I am free': 'أنا حر',
+                        'I am late': 'أنا متأخر',
+                        'I am in a hurry': 'أنا في عجلة',
+                        'I am calm': 'أنا هادئ',
+                        'I am worried': 'أنا قلق',
+                        'I am excited': 'أنا متحمس',
+                        'I am afraid': 'أنا خائف',
+                        'I am angry': 'أنا غاضب',
+                        'I am optimistic': 'أنا متفائل',
+                        'I am pessimistic': 'أنا متشائم',
+                        'I am confident': 'أنا واثق',
+                        'I am shy': 'أنا خجول',
+                        'I am brave': 'أنا شجاع',
+                        'I am smart': 'أنا ذكي',
+                        'I am tall': 'أنا طويل',
+                        'I am short': 'أنا قصير',
+                        'I am fat': 'أنا سمين',
+                        'I am thin': 'أنا نحيف',
+                        'I am beautiful': 'أنا جميل',
+                        'I am ugly': 'أنا قبيح',
+                        'I am young': 'أنا صغير',
+                        'I am old': 'أنا كبير',
+                        'I am strong': 'أنا قوي',
+                        'I am weak': 'أنا ضعيف',
+                        'I am fast': 'أنا سريع',
+                        'I am slow': 'أنا بطيء',
+                        'I am active': 'أنا نشيط',
+                        'I am lazy': 'أنا كسول',
+                        'I am honest': 'أنا صادق',
+                        'I am a liar': 'أنا كاذب',
+                        'I am kind': 'أنا طيب',
+                        'I am evil': 'أنا شرير',
+                        'I am respectful': 'أنا محترم',
+                        'I am rude': 'أنا وقح',
+                        'I am polite': 'أنا مهذب',
+                        'I am educated': 'أنا متعلم',
+                        'I am ignorant': 'أنا جاهل',
+                        'I am rich': 'أنا غني',
+                        'I am poor': 'أنا فقير',
+                        'I am famous': 'أنا مشهور',
+                        'I am unknown': 'أنا مجهول',
+                        'I am lucky': 'أنا محظوظ',
+                        'I am unlucky': 'أنا تعيس',
+                        'I am healthy': 'أنا صحي',
+                        'I am sick': 'أنا مريض'
                     },
                     'ar-fr': {
                         'مرحبا': 'Bonjour',
                         'كيف حالك': 'Comment allez-vous',
                         'شكرا': 'Merci',
-                        'مع السلامة': 'Au revoir'
+                        'مع السلامة': 'Au revoir',
+                        'أهلا وسهلا': 'Bienvenue',
+                        'صباح الخير': 'Bonjour',
+                        'مساء الخير': 'Bonsoir',
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Peut-être que tout ira bien le matin à 8h00 après le petit-déjeuner',
+                        'صباح الخير يا صديقي كل الفطار': 'Bonjour mon ami, tout le petit-déjeuner'
                     },
                     'fr-ar': {
                         'Bonjour': 'مرحبا',
                         'Comment allez-vous': 'كيف حالك',
                         'Merci': 'شكرا',
-                        'Au revoir': 'مع السلامة'
+                        'Au revoir': 'مع السلامة',
+                        'Bienvenue': 'أهلا وسهلا',
+                        'Bonsoir': 'مساء الخير',
+                        'Peut-être que tout ira bien le matin à 8h00 après le petit-déjeuner': 'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار',
+                        'Bonjour mon ami, tout le petit-déjeuner': 'صباح الخير يا صديقي كل الفطار'
                     }
                 };
                 
@@ -172,12 +356,46 @@
                     return translationMap[text];
                 }
                 
-                // If no exact match, return a generic response
+                // Try to find partial matches for common words
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let translatedWords = [];
+                    let hasTranslation = false;
+                    
+                    for (let word of words) {
+                        if (translationMap[word]) {
+                            translatedWords.push(translationMap[word]);
+                            hasTranslation = true;
+                        } else {
+                            translatedWords.push(word);
+                        }
+                    }
+                    
+                    if (hasTranslation) {
+                        return translatedWords.join(' ');
+                    }
+                }
+                
+                // If no match found, return a more helpful response
                 const genericResponses = {
                     'ar-en': `[Translated from Arabic]: ${text}`,
                     'en-ar': `[مترجم من الإنجليزية]: ${text}`,
                     'ar-fr': `[Traduit de l'arabe]: ${text}`,
-                    'fr-ar': `[مترجم من الفرنسية]: ${text}`
+                    'fr-ar': `[مترجم من الفرنسية]: ${text}`,
+                    'ar-es': `[Traducido del árabe]: ${text}`,
+                    'es-ar': `[مترجم من الإسبانية]: ${text}`,
+                    'ar-de': `[Aus dem Arabischen übersetzt]: ${text}`,
+                    'de-ar': `[مترجم من الألمانية]: ${text}`,
+                    'ar-it': `[Tradotto dall'arabo]: ${text}`,
+                    'it-ar': `[مترجم من الإيطالية]: ${text}`,
+                    'ar-pt': `[Traduzido do árabe]: ${text}`,
+                    'pt-ar': `[مترجم من البرتغالية]: ${text}`,
+                    'ar-ru': `[Переведено с арабского]: ${text}`,
+                    'ru-ar': `[مترجم من الروسية]: ${text}`,
+                    'ar-zh': `[从阿拉伯语翻译]: ${text}`,
+                    'zh-ar': `[مترجم من الصينية]: ${text}`,
+                    'ar-ja': `[アラビア語から翻訳]: ${text}`,
+                    'ja-ar': `[مترجم من اليابانية]: ${text}`
                 };
                 
                 return genericResponses[key] || `Translation: ${text}`;

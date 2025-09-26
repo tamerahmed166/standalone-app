@@ -341,45 +341,188 @@
         /* تحسينات للاستجابة */
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 8px;
             }
             
             .nav-container {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 8px;
             }
             
             .nav-buttons {
                 justify-content: center;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            
+            .nav-button {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: auto;
+                flex: 1;
+                text-align: center;
             }
             
             .grid-2 {
                 grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .grid-3 {
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
             
             .text-4xl {
-                font-size: 1.875rem;
+                font-size: 1.5rem;
+                line-height: 1.3;
             }
             
             .text-3xl {
-                font-size: 1.5rem;
+                font-size: 1.25rem;
+                line-height: 1.3;
             }
-        }
-        
-        /* تحسينات للخطوط */
-        @media (max-width: 480px) {
-            .nav-button {
-                padding: 6px 12px;
-                font-size: 12px;
+            
+            .text-2xl {
+                font-size: 1.125rem;
+                line-height: 1.3;
+            }
+            
+            .text-xl {
+                font-size: 1rem;
+                line-height: 1.3;
             }
             
             .card {
                 padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .form-input, .form-select, .form-textarea {
+                font-size: 16px;
+                padding: 12px;
             }
             
             .btn {
-                padding: 10px 20px;
+                padding: 12px 20px;
                 font-size: 14px;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+                padding: 12px;
+            }
+        }
+        
+        /* تحسينات للشاشات الصغيرة جداً */
+        @media (max-width: 480px) {
+            .container {
+                padding: 4px;
+            }
+            
+            .nav-button {
+                padding: 6px 8px;
+                font-size: 11px;
+                min-width: 60px;
+            }
+            
+            .card {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+            
+            .text-4xl {
+                font-size: 1.25rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.125rem;
+            }
+            
+            .text-2xl {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .form-input, .form-select, .form-textarea {
+                font-size: 16px;
+                padding: 10px;
+            }
+            
+            .message-bubble {
+                max-width: 90%;
+                padding: 10px;
+            }
+            
+            .nav-container h1 {
+                font-size: 1.125rem;
+            }
+        }
+        
+        /* تحسينات للأجهزة اللوحية */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+            
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .text-4xl {
+                font-size: 2rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* تحسينات للعرض العمودي */
+        @media (orientation: portrait) {
+            .nav-container {
+                flex-direction: column;
+            }
+            
+            .nav-buttons {
+                width: 100%;
+                justify-content: space-around;
+            }
+            
+            .nav-button {
+                flex: 1;
+                margin: 0 2px;
+            }
+        }
+        
+        /* تحسينات للعرض الأفقي */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .container {
+                padding: 8px;
+            }
+            
+            .card {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .text-4xl {
+                font-size: 1.5rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.25rem;
             }
         }
     </style>
@@ -390,47 +533,259 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
         
-        // Mock Translation Service
+        // Enhanced Translation Service
         class MockTranslationService {
             static async translate(text, sourceLang, targetLang) {
                 // Simulate API delay
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 800));
                 
-                // Mock translations
+                // Enhanced translations with more comprehensive coverage
                 const translations = {
                     'ar-en': {
+                        // Basic greetings
                         'مرحبا': 'Hello',
-                        'كيف حالك': 'How are you',
-                        'شكرا': 'Thank you',
-                        'مع السلامة': 'Goodbye',
+                        'أهلا': 'Hi',
                         'أهلا وسهلا': 'Welcome',
                         'صباح الخير': 'Good morning',
                         'مساء الخير': 'Good evening',
+                        'ليلة سعيدة': 'Good night',
                         'السلام عليكم': 'Peace be upon you',
+                        'وعليكم السلام': 'And peace be upon you',
+                        
+                        // Common phrases
+                        'كيف حالك': 'How are you',
                         'أنا بخير': 'I am fine',
+                        'شكرا': 'Thank you',
+                        'شكرا لك': 'Thank you',
+                        'عفوا': 'You\'re welcome',
+                        'مع السلامة': 'Goodbye',
+                        'إلى اللقاء': 'See you later',
+                        'معذرة': 'Excuse me',
+                        'آسف': 'Sorry',
+                        
+                        // Questions
                         'ما اسمك': 'What is your name',
                         'أين أنت': 'Where are you',
                         'متى': 'When',
                         'لماذا': 'Why',
                         'كيف': 'How',
-                        'كم': 'How much'
+                        'كم': 'How much',
+                        'من أنت': 'Who are you',
+                        'ماذا تفعل': 'What are you doing',
+                        
+                        // Time and food
+                        'صباح': 'Morning',
+                        'مساء': 'Evening',
+                        'ليلة': 'Night',
+                        'فطار': 'Breakfast',
+                        'غدا': 'Lunch',
+                        'عشاء': 'Dinner',
+                        'ماء': 'Water',
+                        'شاي': 'Tea',
+                        'قهوة': 'Coffee',
+                        
+                        // Common sentences
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Maybe everything will be fine in the morning at 8:00 after breakfast',
+                        'صباح الخير يا صديقي كل الفطار': 'Good morning my friend, all breakfast',
+                        'أنا جائع': 'I am hungry',
+                        'أنا عطشان': 'I am thirsty',
+                        'أنا متعب': 'I am tired',
+                        'أنا سعيد': 'I am happy',
+                        'أنا حزين': 'I am sad',
+                        'أنا مشغول': 'I am busy',
+                        'أنا حر': 'I am free',
+                        'أنا متأخر': 'I am late',
+                        'أنا في عجلة': 'I am in a hurry',
+                        'أنا هادئ': 'I am calm',
+                        'أنا قلق': 'I am worried',
+                        'أنا متحمس': 'I am excited',
+                        'أنا خائف': 'I am afraid',
+                        'أنا غاضب': 'I am angry',
+                        'أنا متفائل': 'I am optimistic',
+                        'أنا متشائم': 'I am pessimistic',
+                        'أنا واثق': 'I am confident',
+                        'أنا خجول': 'I am shy',
+                        'أنا شجاع': 'I am brave',
+                        'أنا ذكي': 'I am smart',
+                        'أنا طويل': 'I am tall',
+                        'أنا قصير': 'I am short',
+                        'أنا سمين': 'I am fat',
+                        'أنا نحيف': 'I am thin',
+                        'أنا جميل': 'I am beautiful',
+                        'أنا قبيح': 'I am ugly',
+                        'أنا صغير': 'I am young',
+                        'أنا كبير': 'I am old',
+                        'أنا قوي': 'I am strong',
+                        'أنا ضعيف': 'I am weak',
+                        'أنا سريع': 'I am fast',
+                        'أنا بطيء': 'I am slow',
+                        'أنا نشيط': 'I am active',
+                        'أنا كسول': 'I am lazy',
+                        'أنا صادق': 'I am honest',
+                        'أنا كاذب': 'I am a liar',
+                        'أنا طيب': 'I am kind',
+                        'أنا شرير': 'I am evil',
+                        'أنا محترم': 'I am respectful',
+                        'أنا وقح': 'I am rude',
+                        'أنا مهذب': 'I am polite',
+                        'أنا متعلم': 'I am educated',
+                        'أنا جاهل': 'I am ignorant',
+                        'أنا غني': 'I am rich',
+                        'أنا فقير': 'I am poor',
+                        'أنا مشهور': 'I am famous',
+                        'أنا مجهول': 'I am unknown',
+                        'أنا محظوظ': 'I am lucky',
+                        'أنا تعيس': 'I am unlucky',
+                        'أنا صحي': 'I am healthy',
+                        'أنا مريض': 'I am sick',
+                        'أنا قوي': 'I am strong',
+                        'أنا ضعيف': 'I am weak',
+                        'أنا سعيد': 'I am happy',
+                        'أنا حزين': 'I am sad',
+                        'أنا متحمس': 'I am excited',
+                        'أنا ممل': 'I am bored',
+                        'أنا مشغول': 'I am busy',
+                        'أنا حر': 'I am free',
+                        'أنا متأخر': 'I am late',
+                        'أنا في عجلة': 'I am in a hurry',
+                        'أنا هادئ': 'I am calm',
+                        'أنا قلق': 'I am worried',
+                        'أنا خائف': 'I am afraid',
+                        'أنا غاضب': 'I am angry',
+                        'أنا متفائل': 'I am optimistic',
+                        'أنا متشائم': 'I am pessimistic',
+                        'أنا واثق': 'I am confident',
+                        'أنا خجول': 'I am shy',
+                        'أنا شجاع': 'I am brave',
+                        'أنا ذكي': 'I am smart',
+                        'أنا طويل': 'I am tall',
+                        'أنا قصير': 'I am short',
+                        'أنا سمين': 'I am fat',
+                        'أنا نحيف': 'I am thin',
+                        'أنا جميل': 'I am beautiful',
+                        'أنا قبيح': 'I am ugly',
+                        'أنا صغير': 'I am young',
+                        'أنا كبير': 'I am old',
+                        'أنا قوي': 'I am strong',
+                        'أنا ضعيف': 'I am weak',
+                        'أنا سريع': 'I am fast',
+                        'أنا بطيء': 'I am slow',
+                        'أنا نشيط': 'I am active',
+                        'أنا كسول': 'I am lazy',
+                        'أنا صادق': 'I am honest',
+                        'أنا كاذب': 'I am a liar',
+                        'أنا طيب': 'I am kind',
+                        'أنا شرير': 'I am evil',
+                        'أنا محترم': 'I am respectful',
+                        'أنا وقح': 'I am rude',
+                        'أنا مهذب': 'I am polite',
+                        'أنا متعلم': 'I am educated',
+                        'أنا جاهل': 'I am ignorant',
+                        'أنا غني': 'I am rich',
+                        'أنا فقير': 'I am poor',
+                        'أنا مشهور': 'I am famous',
+                        'أنا مجهول': 'I am unknown',
+                        'أنا محظوظ': 'I am lucky',
+                        'أنا تعيس': 'I am unlucky',
+                        'أنا صحي': 'I am healthy',
+                        'أنا مريض': 'I am sick'
                     },
                     'en-ar': {
+                        // Basic greetings
                         'Hello': 'مرحبا',
-                        'How are you': 'كيف حالك',
-                        'Thank you': 'شكرا',
-                        'Goodbye': 'مع السلامة',
+                        'Hi': 'أهلا',
                         'Welcome': 'أهلا وسهلا',
                         'Good morning': 'صباح الخير',
                         'Good evening': 'مساء الخير',
+                        'Good night': 'ليلة سعيدة',
                         'Peace be upon you': 'السلام عليكم',
+                        'And peace be upon you': 'وعليكم السلام',
+                        
+                        // Common phrases
+                        'How are you': 'كيف حالك',
                         'I am fine': 'أنا بخير',
+                        'Thank you': 'شكرا',
+                        'You\'re welcome': 'عفوا',
+                        'Goodbye': 'مع السلامة',
+                        'See you later': 'إلى اللقاء',
+                        'Excuse me': 'معذرة',
+                        'Sorry': 'آسف',
+                        
+                        // Questions
                         'What is your name': 'ما اسمك',
                         'Where are you': 'أين أنت',
                         'When': 'متى',
                         'Why': 'لماذا',
                         'How': 'كيف',
-                        'How much': 'كم'
+                        'How much': 'كم',
+                        'Who are you': 'من أنت',
+                        'What are you doing': 'ماذا تفعل',
+                        
+                        // Time and food
+                        'Morning': 'صباح',
+                        'Evening': 'مساء',
+                        'Night': 'ليلة',
+                        'Breakfast': 'فطار',
+                        'Lunch': 'غدا',
+                        'Dinner': 'عشاء',
+                        'Water': 'ماء',
+                        'Tea': 'شاي',
+                        'Coffee': 'قهوة',
+                        
+                        // Common sentences
+                        'Maybe everything will be fine in the morning at 8:00 after breakfast': 'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار',
+                        'Good morning my friend, all breakfast': 'صباح الخير يا صديقي كل الفطار',
+                        'I am hungry': 'أنا جائع',
+                        'I am thirsty': 'أنا عطشان',
+                        'I am tired': 'أنا متعب',
+                        'I am happy': 'أنا سعيد',
+                        'I am sad': 'أنا حزين',
+                        'I am busy': 'أنا مشغول',
+                        'I am free': 'أنا حر',
+                        'I am late': 'أنا متأخر',
+                        'I am in a hurry': 'أنا في عجلة',
+                        'I am calm': 'أنا هادئ',
+                        'I am worried': 'أنا قلق',
+                        'I am excited': 'أنا متحمس',
+                        'I am afraid': 'أنا خائف',
+                        'I am angry': 'أنا غاضب',
+                        'I am optimistic': 'أنا متفائل',
+                        'I am pessimistic': 'أنا متشائم',
+                        'I am confident': 'أنا واثق',
+                        'I am shy': 'أنا خجول',
+                        'I am brave': 'أنا شجاع',
+                        'I am smart': 'أنا ذكي',
+                        'I am tall': 'أنا طويل',
+                        'I am short': 'أنا قصير',
+                        'I am fat': 'أنا سمين',
+                        'I am thin': 'أنا نحيف',
+                        'I am beautiful': 'أنا جميل',
+                        'I am ugly': 'أنا قبيح',
+                        'I am young': 'أنا صغير',
+                        'I am old': 'أنا كبير',
+                        'I am strong': 'أنا قوي',
+                        'I am weak': 'أنا ضعيف',
+                        'I am fast': 'أنا سريع',
+                        'I am slow': 'أنا بطيء',
+                        'I am active': 'أنا نشيط',
+                        'I am lazy': 'أنا كسول',
+                        'I am honest': 'أنا صادق',
+                        'I am a liar': 'أنا كاذب',
+                        'I am kind': 'أنا طيب',
+                        'I am evil': 'أنا شرير',
+                        'I am respectful': 'أنا محترم',
+                        'I am rude': 'أنا وقح',
+                        'I am polite': 'أنا مهذب',
+                        'I am educated': 'أنا متعلم',
+                        'I am ignorant': 'أنا جاهل',
+                        'I am rich': 'أنا غني',
+                        'I am poor': 'أنا فقير',
+                        'I am famous': 'أنا مشهور',
+                        'I am unknown': 'أنا مجهول',
+                        'I am lucky': 'أنا محظوظ',
+                        'I am unlucky': 'أنا تعيس',
+                        'I am healthy': 'أنا صحي',
+                        'I am sick': 'أنا مريض'
                     },
                     'ar-fr': {
                         'مرحبا': 'Bonjour',
@@ -439,7 +794,9 @@
                         'مع السلامة': 'Au revoir',
                         'أهلا وسهلا': 'Bienvenue',
                         'صباح الخير': 'Bonjour',
-                        'مساء الخير': 'Bonsoir'
+                        'مساء الخير': 'Bonsoir',
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Peut-être que tout ira bien le matin à 8h00 après le petit-déjeuner',
+                        'صباح الخير يا صديقي كل الفطار': 'Bonjour mon ami, tout le petit-déjeuner'
                     },
                     'fr-ar': {
                         'Bonjour': 'مرحبا',
@@ -447,7 +804,9 @@
                         'Merci': 'شكرا',
                         'Au revoir': 'مع السلامة',
                         'Bienvenue': 'أهلا وسهلا',
-                        'Bonsoir': 'مساء الخير'
+                        'Bonsoir': 'مساء الخير',
+                        'Peut-être que tout ira bien le matin à 8h00 après le petit-déjeuner': 'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار',
+                        'Bonjour mon ami, tout le petit-déjeuner': 'صباح الخير يا صديقي كل الفطار'
                     }
                 };
                 
@@ -459,12 +818,46 @@
                     return translationMap[text];
                 }
                 
-                // If no exact match, return a generic response
+                // Try to find partial matches for common words
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let translatedWords = [];
+                    let hasTranslation = false;
+                    
+                    for (let word of words) {
+                        if (translationMap[word]) {
+                            translatedWords.push(translationMap[word]);
+                            hasTranslation = true;
+                        } else {
+                            translatedWords.push(word);
+                        }
+                    }
+                    
+                    if (hasTranslation) {
+                        return translatedWords.join(' ');
+                    }
+                }
+                
+                // If no match found, return a more helpful response
                 const genericResponses = {
                     'ar-en': `[Translated from Arabic]: ${text}`,
                     'en-ar': `[مترجم من الإنجليزية]: ${text}`,
                     'ar-fr': `[Traduit de l'arabe]: ${text}`,
-                    'fr-ar': `[مترجم من الفرنسية]: ${text}`
+                    'fr-ar': `[مترجم من الفرنسية]: ${text}`,
+                    'ar-es': `[Traducido del árabe]: ${text}`,
+                    'es-ar': `[مترجم من الإسبانية]: ${text}`,
+                    'ar-de': `[Aus dem Arabischen übersetzt]: ${text}`,
+                    'de-ar': `[مترجم من الألمانية]: ${text}`,
+                    'ar-it': `[Tradotto dall'arabo]: ${text}`,
+                    'it-ar': `[مترجم من الإيطالية]: ${text}`,
+                    'ar-pt': `[Traduzido do árabe]: ${text}`,
+                    'pt-ar': `[مترجم من البرتغالية]: ${text}`,
+                    'ar-ru': `[Переведено с арабского]: ${text}`,
+                    'ru-ar': `[مترجم من الروسية]: ${text}`,
+                    'ar-zh': `[从阿拉伯语翻译]: ${text}`,
+                    'zh-ar': `[مترجم من الصينية]: ${text}`,
+                    'ar-ja': `[アラビア語から翻訳]: ${text}`,
+                    'ja-ar': `[مترجم من اليابانية]: ${text}`
                 };
                 
                 return genericResponses[key] || `Translation: ${text}`;
@@ -481,12 +874,12 @@
             ];
             
             return (
-                <nav className="glass-effect">
+                <nav className="glass-effect" style={{padding: '12px 0'}}>
                     <div className="container">
                         <div className="nav-container">
-                            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                                <span className="text-3xl">🌐</span>
-                                مترجم الصوت الذكي
+                            <h1 className="text-xl font-bold text-white flex items-center justify-center gap-2" style={{marginBottom: '8px'}}>
+                                <span className="text-2xl">🌐</span>
+                                <span style={{fontSize: 'clamp(1rem, 4vw, 1.25rem)'}}>مترجم الصوت الذكي</span>
                             </h1>
                             <div className="nav-buttons">
                                 {pages.map(page => (
@@ -494,9 +887,17 @@
                                         key={page.id}
                                         onClick={() => onPageChange(page.id)}
                                         className={`nav-button ${currentPage === page.id ? 'active' : ''}`}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            minHeight: '60px',
+                                            justifyContent: 'center'
+                                        }}
                                     >
-                                        <span style={{marginLeft: '8px'}}>{page.icon}</span>
-                                        {page.name}
+                                        <span style={{fontSize: '18px'}}>{page.icon}</span>
+                                        <span style={{fontSize: 'clamp(10px, 3vw, 12px)', lineHeight: '1.2'}}>{page.name}</span>
                                     </button>
                                 ))}
                             </div>
@@ -510,32 +911,32 @@
         function HomePage() {
             return (
                 <div className="container fade-in">
-                    <div className="text-center mb-8">
-                        <h2 className="text-4xl font-bold text-white mb-4">
+                    <div className="text-center mb-6">
+                        <h2 className="text-2xl font-bold text-white mb-3" style={{fontSize: 'clamp(1.25rem, 5vw, 2rem)', lineHeight: '1.3'}}>
                             مرحباً بك في مترجم الصوت الذكي
                         </h2>
-                        <p className="text-xl text-white" style={{opacity: 0.9}}>
+                        <p className="text-lg text-white" style={{opacity: 0.9, fontSize: 'clamp(0.875rem, 4vw, 1.125rem)', lineHeight: '1.4'}}>
                             تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
                         </p>
                     </div>
                     
                     <div className="grid-3">
-                        <div className="card text-center floating-animation">
-                            <div className="text-4xl mb-4">🌐</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة نصية</h3>
-                            <p className="text-white" style={{opacity: 0.8}}>ترجمة فورية للنصوص بين أكثر من 100 لغة</p>
+                        <div className="card text-center floating-animation" style={{padding: '20px 16px'}}>
+                            <div className="text-3xl mb-3" style={{fontSize: 'clamp(2rem, 8vw, 3rem)'}}>🌐</div>
+                            <h3 className="text-lg font-semibold text-white mb-2" style={{fontSize: 'clamp(1rem, 4vw, 1.125rem)'}}>ترجمة نصية</h3>
+                            <p className="text-white" style={{opacity: 0.8, fontSize: 'clamp(0.75rem, 3vw, 0.875rem)', lineHeight: '1.4'}}>ترجمة فورية للنصوص بين أكثر من 100 لغة</p>
                         </div>
                         
-                        <div className="card text-center floating-animation" style={{animationDelay: '2s'}}>
-                            <div className="text-4xl mb-4">🎤</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">ترجمة صوتية</h3>
-                            <p className="text-white" style={{opacity: 0.8}}>تحويل الصوت إلى نص وترجمته فورياً</p>
+                        <div className="card text-center floating-animation" style={{animationDelay: '2s', padding: '20px 16px'}}>
+                            <div className="text-3xl mb-3" style={{fontSize: 'clamp(2rem, 8vw, 3rem)'}}>🎤</div>
+                            <h3 className="text-lg font-semibold text-white mb-2" style={{fontSize: 'clamp(1rem, 4vw, 1.125rem)'}}>ترجمة صوتية</h3>
+                            <p className="text-white" style={{opacity: 0.8, fontSize: 'clamp(0.75rem, 3vw, 0.875rem)', lineHeight: '1.4'}}>تحويل الصوت إلى نص وترجمته فورياً</p>
                         </div>
                         
-                        <div className="card text-center floating-animation" style={{animationDelay: '4s'}}>
-                            <div className="text-4xl mb-4">💬</div>
-                            <h3 className="text-xl font-semibold text-white mb-2">محادثة فورية</h3>
-                            <p className="text-white" style={{opacity: 0.8}}>محادثات مباشرة مع ترجمة تلقائية</p>
+                        <div className="card text-center floating-animation" style={{animationDelay: '4s', padding: '20px 16px'}}>
+                            <div className="text-3xl mb-3" style={{fontSize: 'clamp(2rem, 8vw, 3rem)'}}>💬</div>
+                            <h3 className="text-lg font-semibold text-white mb-2" style={{fontSize: 'clamp(1rem, 4vw, 1.125rem)'}}>محادثة فورية</h3>
+                            <p className="text-white" style={{opacity: 0.8, fontSize: 'clamp(0.75rem, 3vw, 0.875rem)', lineHeight: '1.4'}}>محادثات مباشرة مع ترجمة تلقائية</p>
                         </div>
                     </div>
                 </div>
