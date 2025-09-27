@@ -2400,6 +2400,62 @@
                 console.log('معالجة النص الصوتي:', text);
                 setInputMessage(text);
                 setMessageType('voice');
+                
+                // إرسال الرسالة مباشرة مع النص
+                await sendVoiceMessage(text);
+            };
+            
+            const sendVoiceMessage = async (text) => {
+                if (!text || text.trim() === '' || isSending) return;
+                
+                setIsSending(true);
+                const messageText = text.trim();
+                
+                // Add message to chat
+                const newMessage = {
+                    id: Date.now(),
+                    text: messageText,
+                    translatedText: '',
+                    sender: 'me',
+                    timestamp: new Date(),
+                    type: 'voice',
+                    originalLang: sourceLang
+                };
+                
+                setMessages(prev => [...prev, newMessage]);
+                setInputMessage('');
+                
+                // Translate message
+                try {
+                    const translatedText = await translateMessage(messageText, sourceLang, targetLang);
+                    const updatedMessage = {
+                        ...newMessage,
+                        translatedText: translatedText
+                    };
+                    
+                    setMessages(prev => prev.map(msg => 
+                        msg.id === newMessage.id ? updatedMessage : msg
+                    ));
+                    
+                    // Simulate sending to other user
+                    setTimeout(() => {
+                        const otherUserMessage = {
+                            id: Date.now() + 1,
+                            text: translatedText,
+                            translatedText: messageText,
+                            sender: 'other',
+                            timestamp: new Date(),
+                            type: 'text',
+                            originalLang: targetLang
+                        };
+                        setMessages(prev => [...prev, otherUserMessage]);
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('Translation error:', error);
+                } finally {
+                    setIsSending(false);
+                }
             };
             
             const sendMessage = async () => {
