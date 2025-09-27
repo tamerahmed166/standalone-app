@@ -253,25 +253,41 @@
         /* Mobile dropdown animations */
         .mobile-dropdown-menu {
             animation: slideDown 0.3s ease-out;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         @keyframes slideDown {
             from {
                 opacity: 0;
                 transform: translateY(-10px);
+                max-height: 0;
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
+                max-height: 400px;
             }
         }
         
         .dropdown-arrow {
             transition: transform 0.3s ease;
+            font-size: 0.8rem;
         }
         
         .dropdown-arrow.open {
             transform: rotate(180deg);
+        }
+        
+        /* Ensure dropdown appears above other content */
+        .mobile-dropdown {
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .mobile-dropdown-menu {
+            position: absolute;
+            z-index: 1001;
         }
         
         /* Mobile and Responsive Design Improvements */
@@ -290,6 +306,7 @@
             .mobile-dropdown {
                 width: 100%;
                 position: relative;
+                z-index: 1000;
             }
             
             .mobile-dropdown button {
@@ -313,24 +330,26 @@
                 top: 100%;
                 left: 0;
                 right: 0;
-                background: rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
                 border-radius: 0.5rem;
                 margin-top: 0.5rem;
                 overflow: hidden;
-                z-index: 50;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+                border: 1px solid rgba(255, 255, 255, 0.2);
             }
             
             .mobile-dropdown-menu button {
                 width: 100%;
-                padding: 0.75rem 1rem;
+                padding: 1rem;
                 text-align: right;
                 border: none;
                 background: transparent;
-                color: white;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                color: #374151;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                 transition: all 0.3s ease;
+                font-size: 0.9rem;
             }
             
             .mobile-dropdown-menu button:last-child {
@@ -338,12 +357,13 @@
             }
             
             .mobile-dropdown-menu button:hover {
-                background: rgba(255, 255, 255, 0.2);
+                background: rgba(124, 58, 237, 0.1);
+                color: #7C3AED;
             }
             
             .mobile-dropdown-menu button.active {
-                background: white;
-                color: #7C3AED;
+                background: #7C3AED;
+                color: white;
                 font-weight: 600;
             }
             
@@ -957,7 +977,7 @@
                         <div className="lg:hidden w-full mobile-dropdown">
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="w-full flex items-center justify-between bg-white/20 text-white px-4 py-3 rounded-lg hover:bg-white/30 transition-all duration-300"
+                                className="w-full flex items-center justify-between bg-white/20 text-white px-4 py-3 rounded-lg hover:bg-white/30 transition-all duration-300 shadow-lg"
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-lg">{currentPageData?.icon}</span>
@@ -969,7 +989,7 @@
                             </button>
                             
                             {isMenuOpen && (
-                                <div className="mobile-dropdown-menu">
+                                <div className="mobile-dropdown-menu shadow-2xl">
                                     {pages.map(page => (
                                         <button
                                             key={page.id}
