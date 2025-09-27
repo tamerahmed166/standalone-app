@@ -235,6 +235,298 @@
             0% { height: 4px; }
             100% { height: 20px; }
         }
+        
+        /* Copy button styles */
+        .copy-button {
+            transition: all 0.2s ease;
+        }
+        
+        .copy-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .copy-button.copied {
+            background: #10B981 !important;
+            transform: scale(1.05);
+        }
+        
+        /* Mobile and Responsive Design Improvements */
+        @media (max-width: 768px) {
+            /* Navigation improvements */
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-buttons {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+                width: 100%;
+            }
+            
+            .nav-buttons button {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.875rem;
+                text-align: center;
+            }
+            
+            /* Home page cards */
+            .home-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .home-card {
+                padding: 1.5rem;
+                text-align: center;
+            }
+            
+            .home-card h3 {
+                font-size: 1.25rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            .home-card p {
+                font-size: 0.875rem;
+                line-height: 1.5;
+            }
+            
+            /* Two-way conversation improvements */
+            .conversation-container {
+                padding: 1rem;
+            }
+            
+            .room-code {
+                font-size: 1.5rem;
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .language-selectors {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+            
+            .language-selectors select {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Message bubbles */
+            .message-bubble {
+                max-width: 90%;
+                margin: 0.5rem 0;
+            }
+            
+            .user-message, .other-message {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+                line-height: 1.4;
+            }
+            
+            /* Voice controls */
+            .voice-controls {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .voice-button {
+                width: 4rem;
+                height: 4rem;
+                margin: 0 auto;
+            }
+            
+            .voice-indicators {
+                justify-content: center;
+                gap: 0.5rem;
+            }
+            
+            /* Input improvements */
+            .input-container {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .input-container input {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 1rem;
+            }
+            
+            .input-container button {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            /* Translation page improvements */
+            .translation-container {
+                padding: 1rem;
+            }
+            
+            .translation-input {
+                min-height: 120px;
+                font-size: 1rem;
+                padding: 1rem;
+            }
+            
+            .translation-result {
+                min-height: 100px;
+                font-size: 1rem;
+                padding: 1rem;
+            }
+            
+            /* OCR page improvements */
+            .ocr-container {
+                padding: 1rem;
+            }
+            
+            .ocr-upload {
+                padding: 2rem 1rem;
+                text-align: center;
+            }
+            
+            .ocr-upload input[type="file"] {
+                width: 100%;
+                padding: 0.75rem;
+            }
+            
+            /* Settings page improvements */
+            .settings-container {
+                padding: 1rem;
+            }
+            
+            .settings-section {
+                margin-bottom: 1.5rem;
+            }
+            
+            .settings-section h3 {
+                font-size: 1.125rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            /* Footer improvements */
+            .footer {
+                padding: 1rem;
+                text-align: center;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+        
+        /* Tablet improvements */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .nav-buttons {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .home-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .language-selectors {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+        
+        /* Large screen improvements */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+            
+            .home-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .conversation-container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+        }
+        
+        /* Touch improvements */
+        @media (hover: none) and (pointer: coarse) {
+            button, input, select, textarea {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            .nav-buttons button {
+                min-height: 48px;
+                padding: 0.75rem 1rem;
+            }
+            
+            .voice-button {
+                min-width: 64px;
+                min-height: 64px;
+            }
+        }
+        
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .glass-effect {
+                backdrop-filter: blur(12px);
+            }
+            
+            .gradient-bg {
+                background-size: 200% 200%;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .glass-effect {
+                background: rgba(0, 0, 0, 0.2);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .other-message {
+                background: rgba(0, 0, 0, 0.1);
+                color: #e5e7eb;
+            }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            .floating-animation,
+            .pulse-glow,
+            .pulse-animation {
+                animation: none;
+            }
+            
+            .gradient-bg {
+                animation: none;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .glass-effect {
+                background: white;
+                border: 1px solid #ccc;
+            }
+            
+            .gradient-bg {
+                background: white;
+            }
+            
+            .nav-buttons,
+            .voice-controls {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -535,31 +827,33 @@
             
             return (
                 <nav className="glass-effect p-4 mb-6 rounded-lg">
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="nav-container flex flex-col lg:flex-row justify-between items-center gap-4">
+                        <h1 className="text-xl lg:text-2xl font-bold text-white flex items-center gap-3">
                             <div className="flex items-center">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                                    <span className="text-lg font-bold text-white">S</span>
+                                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                                    <span className="text-sm lg:text-lg font-bold text-white">S</span>
                                 </div>
-                                <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center -ml-2 -mt-2">
+                                <div className="w-5 h-5 lg:w-6 lg:h-6 bg-orange-500 rounded flex items-center justify-center -ml-2 -mt-2">
                                     <span className="text-white text-xs">🔌</span>
                                 </div>
                             </div>
-                            تطبيق مستقل
+                            <span className="hidden sm:inline">تطبيق مستقل</span>
+                            <span className="sm:hidden">مترجم</span>
                         </h1>
-                        <div className="flex gap-2">
+                        <div className="nav-buttons flex flex-wrap gap-2 w-full lg:w-auto">
                             {pages.map(page => (
                                 <button
                                     key={page.id}
                                     onClick={() => onPageChange(page.id)}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                                    className={`flex-1 lg:flex-none px-3 py-2 rounded-lg transition-all duration-300 text-sm lg:text-base ${
                                         currentPage === page.id
                                             ? 'bg-white text-purple-600 font-semibold'
                                             : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }`}
                                 >
-                                    <span className="mr-2">{page.icon}</span>
-                                    {page.name}
+                                    <span className="mr-1 lg:mr-2">{page.icon}</span>
+                                    <span className="hidden sm:inline">{page.name}</span>
+                                    <span className="sm:hidden">{page.name.split(' ')[0]}</span>
                                 </button>
                             ))}
                         </div>
@@ -598,48 +892,48 @@
                     </div>
                     
                     {/* Four Main Features */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div className="home-cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover"
+                            className="home-card glass-effect p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover"
                             onClick={() => onPageChange('translate')}
                         >
-                            <div className="text-5xl mb-4">🌐</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">الترجمة</h3>
-                            <p className="text-white opacity-80 mb-4">ترجمة فورية للنصوص والصوت بين أكثر من 100 لغة</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl lg:text-5xl mb-4">🌐</div>
+                            <h3 className="text-xl lg:text-2xl font-semibold text-white mb-3">الترجمة</h3>
+                            <p className="text-white opacity-80 mb-4 text-sm lg:text-base">ترجمة فورية للنصوص والصوت بين أكثر من 100 لغة</p>
+                            <div className="text-xs lg:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="home-card glass-effect p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '2s'}}
                             onClick={() => onPageChange('conversation')}
                         >
-                            <div className="text-5xl mb-4">💬</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">المحادثة</h3>
-                            <p className="text-white opacity-80 mb-4">محادثات مباشرة مع ترجمة تلقائية فورية</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl lg:text-5xl mb-4">💬</div>
+                            <h3 className="text-xl lg:text-2xl font-semibold text-white mb-3">المحادثة</h3>
+                            <p className="text-white opacity-80 mb-4 text-sm lg:text-base">محادثات مباشرة مع ترجمة تلقائية فورية</p>
+                            <div className="text-xs lg:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="home-card glass-effect p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '3s'}}
                             onClick={() => onPageChange('two-way-conversation')}
                         >
-                            <div className="text-5xl mb-4">👥</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">محادثة ثنائية</h3>
-                            <p className="text-white opacity-80 mb-4">محادثة بين شخصين مع ترجمة فورية وأكواد غرف</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl lg:text-5xl mb-4">👥</div>
+                            <h3 className="text-xl lg:text-2xl font-semibold text-white mb-3">محادثة ثنائية</h3>
+                            <p className="text-white opacity-80 mb-4 text-sm lg:text-base">محادثة بين شخصين مع ترجمة فورية وأكواد غرف</p>
+                            <div className="text-xs lg:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="home-card glass-effect p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '4s'}}
                             onClick={() => onPageChange('ocr')}
                         >
-                            <div className="text-5xl mb-4">📷</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">قراءة الصور</h3>
-                            <p className="text-white opacity-80 mb-4">قراءة النصوص من الصور وترجمتها فورياً</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl lg:text-5xl mb-4">📷</div>
+                            <h3 className="text-xl lg:text-2xl font-semibold text-white mb-3">قراءة الصور</h3>
+                            <p className="text-white opacity-80 mb-4 text-sm lg:text-base">قراءة النصوص من الصور وترجمتها فورياً</p>
+                            <div className="text-xs lg:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
@@ -2018,7 +2312,13 @@
             const joinRoom = () => {
                 if (/^[A-Z0-9]{6}$/.test(inputRoomCode)) {
                     setRoomCode(inputRoomCode);
-                    setCurrentView('join-room');
+                    setCurrentView('chat');
+                    // محاكاة الاتصال
+                    setConnectionState('connecting');
+                    setTimeout(() => {
+                        setConnectionState('connected');
+                        setIsConnected(true);
+                    }, 2000);
                 } else {
                     alert('كود الغرفة غير صحيح');
                 }
@@ -2027,8 +2327,20 @@
             const copyRoomCode = async () => {
                 try {
                     await navigator.clipboard.writeText(roomCode);
+                    // إظهار رسالة نجاح
+                    const button = document.querySelector('.copy-button');
+                    if (button) {
+                        const originalText = button.textContent;
+                        button.textContent = '✅ تم النسخ!';
+                        button.classList.add('copied');
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.classList.remove('copied');
+                        }, 2000);
+                    }
                 } catch (error) {
                     console.error('Failed to copy room code:', error);
+                    alert('فشل في نسخ الكود. حاول مرة أخرى.');
                 }
             };
             
@@ -2044,9 +2356,9 @@
             
             const renderHome = () => (
                 <div className="fade-in">
-                    <div className="glass-effect p-8 rounded-lg text-center mb-6">
-                        <h2 className="text-3xl font-bold text-white mb-4">محادثة ثنائية</h2>
-                        <p className="text-white/80 mb-6">محادثة صوتية متقدمة مع ترجمة فورية واتصال مباشر</p>
+                    <div className="conversation-container glass-effect p-6 lg:p-8 rounded-lg text-center mb-6">
+                        <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">محادثة ثنائية</h2>
+                        <p className="text-white/80 mb-6 text-sm lg:text-base">محادثة صوتية متقدمة مع ترجمة فورية واتصال مباشر</p>
                         
                         <div className="space-y-4">
                             <button
@@ -2079,23 +2391,23 @@
             
             const renderCreateRoom = () => (
                 <div className="fade-in">
-                    <div className="glass-effect p-8 rounded-lg">
+                    <div className="glass-effect p-6 lg:p-8 rounded-lg">
                         <div className="text-center mb-6">
                             <h2 className="text-2xl font-bold text-white mb-2">تم إنشاء الغرفة</h2>
-                            <p className="text-white/80">شارك هذا الكود مع الشخص الآخر للانضمام</p>
+                            <p className="text-white/80 text-sm lg:text-base">شارك هذا الكود مع الشخص الآخر للانضمام</p>
                         </div>
                         
                         <div className="bg-white/10 rounded-xl p-6 mb-6">
                             <div className="text-center">
                                 <p className="text-white/60 text-sm mb-2">كود الغرفة</p>
-                                <div className="text-3xl text-white mb-4 font-mono font-bold">
+                                <div className="text-2xl lg:text-3xl text-white mb-4 font-mono font-bold tracking-wider">
                                     {roomCode}
                                 </div>
                                 <button
                                     onClick={copyRoomCode}
-                                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200"
+                                    className="copy-button bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm"
                                 >
-                                    نسخ الكود
+                                    📋 نسخ الكود
                                 </button>
                             </div>
                         </div>
@@ -2105,7 +2417,7 @@
                                 onClick={startChat}
                                 className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300"
                             >
-                                بدء المحادثة
+                                🚀 بدء المحادثة
                             </button>
                             
                             <button
@@ -2115,16 +2427,22 @@
                                 العودة للرئيسية
                             </button>
                         </div>
+                        
+                        <div className="mt-6 p-4 bg-blue-500/20 rounded-lg">
+                            <p className="text-white/80 text-sm text-center">
+                                💡 نصيحة: شارك الكود مع الشخص الآخر عبر الرسائل أو المكالمة
+                            </p>
+                        </div>
                     </div>
                 </div>
             );
             
             const renderJoinRoom = () => (
                 <div className="fade-in">
-                    <div className="glass-effect p-8 rounded-lg">
+                    <div className="glass-effect p-6 lg:p-8 rounded-lg">
                         <div className="text-center mb-6">
                             <h2 className="text-2xl font-bold text-white mb-2">الانضمام لغرفة</h2>
-                            <p className="text-white/80">أدخل كود الغرفة للانضمام</p>
+                            <p className="text-white/80 text-sm lg:text-base">أدخل كود الغرفة للانضمام</p>
                         </div>
                         
                         <div className="mb-6">
@@ -2132,18 +2450,21 @@
                                 type="text"
                                 value={inputRoomCode}
                                 onChange={(e) => setInputRoomCode(e.target.value.toUpperCase())}
-                                placeholder="أدخل كود الغرفة"
-                                className="w-full bg-white/20 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 focus:outline-none focus:border-white/50"
+                                placeholder="أدخل كود الغرفة (6 أحرف)"
+                                className="w-full bg-white/20 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 focus:outline-none focus:border-white/50 text-center text-lg font-mono"
                                 maxLength={6}
+                                onKeyPress={(e) => e.key === 'Enter' && joinRoom()}
                             />
+                            <p className="text-white/60 text-sm mt-2">مثال: ABC123</p>
                         </div>
                         
                         <div className="space-y-3">
                             <button
                                 onClick={joinRoom}
-                                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300"
+                                disabled={!inputRoomCode || inputRoomCode.length !== 6}
+                                className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300"
                             >
-                                الانضمام
+                                {inputRoomCode.length === 6 ? 'الانضمام الآن' : 'أدخل كود الغرفة'}
                             </button>
                             
                             <button
@@ -2161,9 +2482,9 @@
                 <div className="fade-in">
                     {/* Header */}
                     <div className="glass-effect p-4 rounded-lg mb-6">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                             <div>
-                                <h2 className="text-xl font-bold text-white">غرفة: {roomCode}</h2>
+                                <h2 className="text-lg lg:text-xl font-bold text-white">غرفة: {roomCode}</h2>
                                 <div className={`text-sm ${connectionState === 'connected' ? 'text-green-400' : 'text-red-400'}`}>
                                     {connectionState === 'connected' && 'متصل مباشرة'}
                                     {connectionState === 'connecting' && 'جاري الاتصال...'}
@@ -2171,11 +2492,11 @@
                                 </div>
                             </div>
                             
-                            <div className="flex items-center space-x-2 space-x-reverse">
+                            <div className="language-selectors flex flex-col lg:flex-row items-stretch lg:items-center space-y-2 lg:space-y-0 lg:space-x-2 lg:space-x-reverse w-full lg:w-auto">
                                 <select
                                     value={sourceLang}
                                     onChange={(e) => setSourceLang(e.target.value)}
-                                    className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-1 text-sm"
+                                    className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 text-sm"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code} className="bg-gray-800">
@@ -2184,12 +2505,13 @@
                                     ))}
                                 </select>
                                 
-                                <span className="text-white/60">→</span>
+                                <span className="text-white/60 text-center lg:hidden">↓</span>
+                                <span className="text-white/60 hidden lg:inline">→</span>
                                 
                                 <select
                                     value={targetLang}
                                     onChange={(e) => setTargetLang(e.target.value)}
-                                    className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-1 text-sm"
+                                    className="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 text-sm"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code} className="bg-gray-800">
@@ -2244,45 +2566,47 @@
                     
                     {/* Voice Controls */}
                     <div className="glass-effect p-4 rounded-lg">
-                        <div className="flex items-center justify-center space-x-4 space-x-reverse">
+                        <div className="voice-controls flex flex-col lg:flex-row items-center justify-center gap-4">
                             <button
                                 onClick={isRecording ? stopRecording : startRecording}
-                                className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                className={`voice-button w-16 h-16 lg:w-16 lg:h-16 rounded-full flex items-center justify-center transition-all duration-300 ${
                                     isRecording 
                                         ? 'bg-red-500 hover:bg-red-600 animate-pulse' 
                                         : 'bg-blue-500 hover:bg-blue-600'
                                 }`}
                             >
-                                <span className="material-icons text-white">
+                                <span className="material-icons text-white text-xl">
                                     {isRecording ? 'stop' : 'mic'}
                                 </span>
                             </button>
                             
-                            {isRecording && (
-                                <div className="flex items-center gap-1">
-                                    {[...Array(5)].map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className="w-1 bg-blue-500 rounded"
-                                            style={{
-                                                height: `${4 + (audioLevel / 10) * 16}px`
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                            
-                            {isTranslating && (
-                                <div className="text-white/80 text-sm">
-                                    جاري الترجمة...
-                                </div>
-                            )}
-                            
-                            {isSpeaking && (
-                                <div className="text-white/80 text-sm">
-                                    جاري التحدث...
-                                </div>
-                            )}
+                            <div className="voice-indicators flex items-center gap-2">
+                                {isRecording && (
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="w-1 bg-blue-500 rounded"
+                                                style={{
+                                                    height: `${4 + (audioLevel / 10) * 16}px`
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                {isTranslating && (
+                                    <div className="text-white/80 text-sm">
+                                        جاري الترجمة...
+                                    </div>
+                                )}
+                                
+                                {isSpeaking && (
+                                    <div className="text-white/80 text-sm">
+                                        جاري التحدث...
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         
                         <div className="text-center mt-4">
