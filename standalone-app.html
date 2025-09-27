@@ -250,6 +250,30 @@
             transform: scale(1.05);
         }
         
+        /* Mobile dropdown animations */
+        .mobile-dropdown-menu {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+        }
+        
+        .dropdown-arrow.open {
+            transform: rotate(180deg);
+        }
+        
         /* Mobile and Responsive Design Improvements */
         @media (max-width: 768px) {
             /* Navigation improvements */
@@ -259,16 +283,68 @@
             }
             
             .nav-buttons {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
-                width: 100%;
+                display: none; /* Hidden on mobile, replaced with dropdown */
             }
             
-            .nav-buttons button {
-                padding: 0.75rem 0.5rem;
+            /* Mobile dropdown styles */
+            .mobile-dropdown {
+                width: 100%;
+                position: relative;
+            }
+            
+            .mobile-dropdown button {
+                width: 100%;
+                padding: 0.75rem 1rem;
                 font-size: 0.875rem;
-                text-align: center;
+                text-align: right;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                border-radius: 0.5rem;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-dropdown button:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+            
+            .mobile-dropdown-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 0.5rem;
+                margin-top: 0.5rem;
+                overflow: hidden;
+                z-index: 50;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            }
+            
+            .mobile-dropdown-menu button {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                text-align: right;
+                border: none;
+                background: transparent;
+                color: white;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-dropdown-menu button:last-child {
+                border-bottom: none;
+            }
+            
+            .mobile-dropdown-menu button:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+            
+            .mobile-dropdown-menu button.active {
+                background: white;
+                color: #7C3AED;
+                font-weight: 600;
             }
             
             /* Home page cards */
@@ -816,6 +892,22 @@
         
         // Navigation Component
         function Navigation({ currentPage, onPageChange }) {
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            
+            // Close menu when clicking outside
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (isMenuOpen && !event.target.closest('.mobile-dropdown')) {
+                        setIsMenuOpen(false);
+                    }
+                };
+                
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => {
+                    document.removeEventListener('mousedown', handleClickOutside);
+                };
+            }, [isMenuOpen]);
+            
             const pages = [
                 { id: 'home', name: 'الرئيسية', icon: '🏠' },
                 { id: 'translate', name: 'الترجمة', icon: '🌐' },
@@ -824,6 +916,8 @@
                 { id: 'ocr', name: 'قراءة الصور', icon: '📷' },
                 { id: 'settings', name: 'الإعدادات', icon: '⚙️' }
             ];
+            
+            const currentPageData = pages.find(page => page.id === currentPage);
             
             return (
                 <nav className="glass-effect p-4 mb-6 rounded-lg">
@@ -840,22 +934,61 @@
                             <span className="hidden sm:inline">تطبيق مستقل</span>
                             <span className="sm:hidden">مترجم</span>
                         </h1>
-                        <div className="nav-buttons flex flex-wrap gap-2 w-full lg:w-auto">
+                        
+                        {/* Desktop Navigation */}
+                        <div className="hidden lg:flex nav-buttons gap-2">
                             {pages.map(page => (
                                 <button
                                     key={page.id}
                                     onClick={() => onPageChange(page.id)}
-                                    className={`flex-1 lg:flex-none px-3 py-2 rounded-lg transition-all duration-300 text-sm lg:text-base ${
+                                    className={`px-3 py-2 rounded-lg transition-all duration-300 text-base ${
                                         currentPage === page.id
                                             ? 'bg-white text-purple-600 font-semibold'
                                             : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }`}
                                 >
-                                    <span className="mr-1 lg:mr-2">{page.icon}</span>
-                                    <span className="hidden sm:inline">{page.name}</span>
-                                    <span className="sm:hidden">{page.name.split(' ')[0]}</span>
+                                    <span className="mr-2">{page.icon}</span>
+                                    {page.name}
                                 </button>
                             ))}
+                        </div>
+                        
+                        {/* Mobile Dropdown Navigation */}
+                        <div className="lg:hidden w-full mobile-dropdown">
+                            <button
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="w-full flex items-center justify-between bg-white/20 text-white px-4 py-3 rounded-lg hover:bg-white/30 transition-all duration-300"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-lg">{currentPageData?.icon}</span>
+                                    <span className="font-medium">{currentPageData?.name}</span>
+                                </div>
+                                <span className={`dropdown-arrow ${isMenuOpen ? 'open' : ''}`}>
+                                    ▼
+                                </span>
+                            </button>
+                            
+                            {isMenuOpen && (
+                                <div className="mobile-dropdown-menu">
+                                    {pages.map(page => (
+                                        <button
+                                            key={page.id}
+                                            onClick={() => {
+                                                onPageChange(page.id);
+                                                setIsMenuOpen(false);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 text-right transition-all duration-300 ${
+                                                currentPage === page.id
+                                                    ? 'active'
+                                                    : ''
+                                            }`}
+                                        >
+                                            <span className="text-lg">{page.icon}</span>
+                                            <span className="font-medium">{page.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </nav>
