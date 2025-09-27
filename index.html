@@ -2149,6 +2149,14 @@
                 };
             }, []);
             
+            // Update recognition language when sourceLang changes
+            useEffect(() => {
+                if (recognition.current) {
+                    recognition.current.lang = sourceLang === 'ar' ? 'ar-SA' : 'en-US';
+                    console.log('تم تحديث لغة التعرف على الصوت:', recognition.current.lang);
+                }
+            }, [sourceLang]);
+            
             const initializeServices = async () => {
                 setConnectionState('ready');
                 
@@ -2156,21 +2164,34 @@
                 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                     recognition.current = new SpeechRecognition();
-                    recognition.current.continuous = true;
-                    recognition.current.interimResults = true;
-                    recognition.current.lang = sourceLang;
+                    recognition.current.continuous = false;
+                    recognition.current.interimResults = false;
+                    recognition.current.lang = sourceLang === 'ar' ? 'ar-SA' : 'en-US';
                     
                     recognition.current.onresult = (event) => {
+                        console.log('نتيجة التعرف على الصوت:', event);
                         let finalTranscript = '';
+                        
                         for (let i = event.resultIndex; i < event.results.length; i++) {
                             if (event.results[i].isFinal) {
                                 finalTranscript += event.results[i][0].transcript;
                             }
                         }
                         
-                        if (finalTranscript) {
-                            handleVoiceInput(finalTranscript);
+                        console.log('النص النهائي:', finalTranscript);
+                        
+                        if (finalTranscript && finalTranscript.trim() !== '') {
+                            handleVoiceInput(finalTranscript.trim());
                         }
+                    };
+                    
+                    recognition.current.onstart = () => {
+                        console.log('بدء التسجيل الصوتي...');
+                    };
+                    
+                    recognition.current.onend = () => {
+                        console.log('انتهاء التسجيل الصوتي');
+                        setIsRecording(false);
                     };
                     
                     recognition.current.onerror = (event) => {
@@ -2201,16 +2222,24 @@
             };
             
             const handleVoiceInput = async (text) => {
+                if (!text || text.trim() === '') {
+                    console.log('لا يوجد نص للترجمة');
+                    return;
+                }
+                
+                console.log('معالجة النص الصوتي:', text);
                 setIsTranslating(true);
+                
                 try {
                     const translation = await TranslationService.translate(text, sourceLang, targetLang);
+                    console.log('الترجمة:', translation);
                     
                     // Add user message
                     const userMessage = {
                         id: Date.now(),
                         type: 'user',
-                        text,
-                        translation,
+                        text: text.trim(),
+                        translation: translation.trim(),
                         timestamp: Date.now()
                     };
                     
@@ -2232,35 +2261,65 @@
                     if (synthesis.current) {
                         const utterance = new SpeechSynthesisUtterance(translation);
                         utterance.lang = targetLang;
-                        utterance.onstart = () => setIsSpeaking(true);
-                        utterance.onend = () => setIsSpeaking(false);
+                        utterance.onstart = () => {
+                            console.log('بدء تشغيل الترجمة');
+                            setIsSpeaking(true);
+                        };
+                        utterance.onend = () => {
+                            console.log('انتهاء تشغيل الترجمة');
+                            setIsSpeaking(false);
+                        };
+                        utterance.onerror = (error) => {
+                            console.error('خطأ في تشغيل الصوت:', error);
+                            setIsSpeaking(false);
+                        };
                         synthesis.current.speak(utterance);
                     }
                 } catch (error) {
-                    console.error('Translation error:', error);
+                    console.error('خطأ في الترجمة:', error);
+                    alert('فشل في الترجمة. حاول مرة أخرى.');
                 } finally {
                     setIsTranslating(false);
                 }
             };
             
             const startRecording = async () => {
-                if (recognition.current && !isRecording) {
-                    try {
-                        setIsRecording(true);
-                        recognition.current.start();
-                        startAudioVisualization();
-                    } catch (error) {
-                        console.error('Error starting recording:', error);
-                        setIsRecording(false);
-                    }
+                if (!recognition.current) {
+                    alert('التعرف على الصوت غير متاح. تأكد من أن المتصفح يدعم هذه الميزة.');
+                    return;
+                }
+                
+                if (isRecording) {
+                    console.log('التسجيل جاري بالفعل');
+                    return;
+                }
+                
+                try {
+                    setIsRecording(true);
+                    recognition.current.start();
+                    startAudioVisualization();
+                    console.log('بدء التسجيل الصوتي...');
+                } catch (error) {
+                    console.error('خطأ في بدء التسجيل:', error);
+                    setIsRecording(false);
+                    alert('فشل في بدء التسجيل. تأكد من السماح للموقع بالوصول للميكروفون.');
                 }
             };
             
             const stopRecording = () => {
-                if (recognition.current && isRecording) {
+                if (!recognition.current || !isRecording) {
+                    console.log('لا يوجد تسجيل جاري');
+                    return;
+                }
+                
+                try {
                     setIsRecording(false);
                     recognition.current.stop();
                     stopAudioVisualization();
+                    console.log('توقف التسجيل الصوتي');
+                } catch (error) {
+                    console.error('خطأ في إيقاف التسجيل:', error);
+                    setIsRecording(false);
                 }
             };
             
