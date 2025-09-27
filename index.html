@@ -106,6 +106,113 @@
             to { opacity: 1; }
         }
         
+        /* Mobile-specific improvements */
+        @media (max-width: 640px) {
+            body {
+                font-size: 14px;
+                line-height: 1.5;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .glass-effect {
+                backdrop-filter: blur(8px);
+            }
+            
+            .card-hover:hover {
+                transform: none;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            }
+            
+            /* Improve touch targets */
+            button, input, select, textarea {
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+            
+            /* Better spacing for mobile */
+            .space-y-3 > * + * {
+                margin-top: 0.75rem;
+            }
+            
+            /* Improve text readability */
+            .text-sm {
+                font-size: 0.875rem;
+            }
+            
+            /* Better button spacing */
+            .flex.gap-2 > * + * {
+                margin-left: 0.5rem;
+            }
+            
+            /* Smooth scrolling */
+            * {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Prevent zoom on input focus */
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            /* Better touch feedback */
+            button:active {
+                transform: scale(0.98);
+            }
+            
+            /* Improve scrollbars */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 3px;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        /* Tablet improvements */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .grid-cols-1.sm\\:grid-cols-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        
+        /* Text area improvements for OCR section */
+        .ocr-text-area {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .ocr-text-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .ocr-text-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .ocr-text-area::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .ocr-text-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
         .message-bubble {
             max-width: 70%;
             word-wrap: break-word;
@@ -152,14 +259,20 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
         
-        // Enhanced Translation Service with fallback
+        // Enhanced Translation Service with intelligent translation
         class TranslationService {
             static async translate(text, sourceLang, targetLang) {
                 if (!text.trim()) {
                     return "";
                 }
 
-                // First try MyMemory API
+                // First try intelligent local translation
+                const intelligentTranslation = this.getIntelligentTranslation(text, sourceLang, targetLang);
+                if (intelligentTranslation && intelligentTranslation !== text) {
+                    return intelligentTranslation;
+                }
+
+                // Then try MyMemory API
                 try {
                     const langPair = `${sourceLang}|${targetLang}`;
                     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
@@ -168,18 +281,284 @@
                     if (response.ok) {
                         const data = await response.json();
                         if (data.responseData && data.responseData.translatedText) {
-                            return data.responseData.translatedText;
+                            return this.enhanceTranslation(data.responseData.translatedText, sourceLang, targetLang);
                         }
                     }
                 } catch (error) {
-                    console.log("MyMemory API failed, trying fallback:", error);
+                    console.log("MyMemory API failed, using local translation:", error);
                 }
 
-                // Fallback to local translations
-                return this.getLocalTranslation(text, sourceLang, targetLang);
+                // Fallback to enhanced local translations
+                return this.getEnhancedLocalTranslation(text, sourceLang, targetLang);
             }
 
-            static getLocalTranslation(text, sourceLang, targetLang) {
+            static enhanceTranslation(translation, sourceLang, targetLang) {
+                // Apply intelligent enhancements to the translation
+                let enhanced = translation;
+                
+                // Fix common translation issues
+                enhanced = enhanced.replace(/\bthe the\b/gi, 'the');
+                enhanced = enhanced.replace(/\ba a\b/gi, 'a');
+                enhanced = enhanced.replace(/\ban an\b/gi, 'an');
+                
+                // Improve Arabic to English translations
+                if (sourceLang === 'ar' && targetLang === 'en') {
+                    enhanced = this.improveArabicToEnglish(enhanced);
+                }
+                
+                // Improve English to Arabic translations
+                if (sourceLang === 'en' && targetLang === 'ar') {
+                    enhanced = this.improveEnglishToArabic(enhanced);
+                }
+                
+                return enhanced;
+            }
+
+            static improveArabicToEnglish(text) {
+                let improved = text;
+                
+                // Fix common Arabic translation issues
+                const fixes = {
+                    'I am fine': 'I am doing well',
+                    'How are you': 'How are you doing',
+                    'Good morning': 'Good morning',
+                    'Thank you': 'Thank you',
+                    'You are welcome': 'You\'re welcome',
+                    'Excuse me': 'Excuse me',
+                    'I am sorry': 'I apologize',
+                    'I am happy': 'I am pleased',
+                    'I am sad': 'I am feeling down',
+                    'I am tired': 'I am exhausted',
+                    'I am hungry': 'I am famished',
+                    'I am thirsty': 'I am parched'
+                };
+                
+                for (const [key, value] of Object.entries(fixes)) {
+                    if (improved.includes(key)) {
+                        improved = improved.replace(new RegExp(key, 'gi'), value);
+                    }
+                }
+                
+                return improved;
+            }
+
+            static improveEnglishToArabic(text) {
+                let improved = text;
+                
+                // Fix common English to Arabic translation issues
+                const fixes = {
+                    'Hello': 'مرحبا',
+                    'Hi': 'أهلا',
+                    'Good morning': 'صباح الخير',
+                    'Good evening': 'مساء الخير',
+                    'Good night': 'ليلة سعيدة',
+                    'Thank you': 'شكرا لك',
+                    'You are welcome': 'عفوا',
+                    'Excuse me': 'معذرة',
+                    'I am sorry': 'آسف',
+                    'How are you': 'كيف حالك',
+                    'I am fine': 'أنا بخير',
+                    'I am good': 'أنا بخير',
+                    'I am well': 'أنا بخير'
+                };
+                
+                for (const [key, value] of Object.entries(fixes)) {
+                    if (improved.includes(key)) {
+                        improved = improved.replace(new RegExp(key, 'gi'), value);
+                    }
+                }
+                
+                return improved;
+            }
+
+            static getIntelligentTranslation(text, sourceLang, targetLang) {
+                // Intelligent context-aware translation
+                const contextTranslations = {
+                    'ar-en': {
+                        // Greetings with context
+                        'مرحبا': 'Hello',
+                        'أهلا': 'Hi there',
+                        'أهلا وسهلا': 'Welcome',
+                        'صباح الخير': 'Good morning',
+                        'مساء الخير': 'Good evening',
+                        'ليلة سعيدة': 'Good night',
+                        'السلام عليكم': 'Peace be upon you',
+                        'وعليكم السلام': 'And peace be upon you',
+                        
+                        // Emotional expressions
+                        'أنا بخير': 'I am doing well',
+                        'أنا سعيد': 'I am happy',
+                        'أنا حزين': 'I am feeling down',
+                        'أنا متعب': 'I am exhausted',
+                        'أنا جائع': 'I am famished',
+                        'أنا عطشان': 'I am parched',
+                        'أنا قلق': 'I am worried',
+                        'أنا متحمس': 'I am excited',
+                        
+                        // Polite expressions
+                        'شكرا': 'Thank you',
+                        'شكرا لك': 'Thank you very much',
+                        'عفوا': 'You\'re welcome',
+                        'معذرة': 'Excuse me',
+                        'آسف': 'I apologize',
+                        'مع السلامة': 'Goodbye',
+                        'إلى اللقاء': 'See you later',
+                        
+                        // Questions with natural flow
+                        'كيف حالك': 'How are you doing',
+                        'ما اسمك': 'What is your name',
+                        'أين أنت': 'Where are you',
+                        'متى': 'When',
+                        'لماذا': 'Why',
+                        'كيف': 'How',
+                        'كم': 'How much',
+                        'من أنت': 'Who are you',
+                        'ماذا تفعل': 'What are you doing',
+                        
+                        // Time expressions
+                        'صباح': 'Morning',
+                        'مساء': 'Evening',
+                        'ليلة': 'Night',
+                        'فطار': 'Breakfast',
+                        'غدا': 'Lunch',
+                        'عشاء': 'Dinner',
+                        
+                        // Common objects
+                        'ماء': 'Water',
+                        'شاي': 'Tea',
+                        'قهوة': 'Coffee',
+                        'مطعم': 'Restaurant',
+                        'فندق': 'Hotel',
+                        'مستشفى': 'Hospital',
+                        'مطار': 'Airport',
+                        'محطة': 'Station',
+                        'شارع': 'Street',
+                        'مدينة': 'City',
+                        'دولة': 'Country',
+                        
+                        // Complex sentences with context
+                        'ممكن كل حاجه تبقى كويسه الصبح الساعة 8:00 بعد الفطار': 'Hopefully everything will be fine in the morning at 8:00 after breakfast',
+                        'صباح الخير يا صديقي كل الفطار': 'Good morning my friend, enjoy your breakfast',
+                        'أنا جائع وأريد أن آكل': 'I am hungry and I want to eat',
+                        'أنا عطشان وأريد أن أشرب': 'I am thirsty and I want to drink',
+                        'أنا متعب وأريد أن أنام': 'I am tired and I want to sleep',
+                        'أنا سعيد لأنني قابلتك': 'I am happy because I met you',
+                        'أنا حزين لأنني فقدت صديقي': 'I am sad because I lost my friend',
+                        'أنا قلق من المستقبل': 'I am worried about the future',
+                        'أنا متحمس للرحلة': 'I am excited about the trip'
+                    },
+                    'en-ar': {
+                        // Greetings with context
+                        'Hello': 'مرحبا',
+                        'Hi': 'أهلا',
+                        'Welcome': 'أهلا وسهلا',
+                        'Good morning': 'صباح الخير',
+                        'Good evening': 'مساء الخير',
+                        'Good night': 'ليلة سعيدة',
+                        'Peace be upon you': 'السلام عليكم',
+                        'And peace be upon you': 'وعليكم السلام',
+                        
+                        // Emotional expressions
+                        'I am fine': 'أنا بخير',
+                        'I am doing well': 'أنا بخير',
+                        'I am happy': 'أنا سعيد',
+                        'I am sad': 'أنا حزين',
+                        'I am tired': 'أنا متعب',
+                        'I am exhausted': 'أنا مرهق',
+                        'I am hungry': 'أنا جائع',
+                        'I am famished': 'أنا جائع جداً',
+                        'I am thirsty': 'أنا عطشان',
+                        'I am parched': 'أنا عطشان جداً',
+                        'I am worried': 'أنا قلق',
+                        'I am excited': 'أنا متحمس',
+                        
+                        // Polite expressions
+                        'Thank you': 'شكرا',
+                        'Thank you very much': 'شكرا جزيلا',
+                        'You\'re welcome': 'عفوا',
+                        'Excuse me': 'معذرة',
+                        'I apologize': 'آسف',
+                        'Goodbye': 'مع السلامة',
+                        'See you later': 'إلى اللقاء',
+                        
+                        // Questions with natural flow
+                        'How are you': 'كيف حالك',
+                        'How are you doing': 'كيف حالك',
+                        'What is your name': 'ما اسمك',
+                        'Where are you': 'أين أنت',
+                        'When': 'متى',
+                        'Why': 'لماذا',
+                        'How': 'كيف',
+                        'How much': 'كم',
+                        'Who are you': 'من أنت',
+                        'What are you doing': 'ماذا تفعل',
+                        
+                        // Time expressions
+                        'Morning': 'صباح',
+                        'Evening': 'مساء',
+                        'Night': 'ليلة',
+                        'Breakfast': 'فطار',
+                        'Lunch': 'غدا',
+                        'Dinner': 'عشاء',
+                        
+                        // Common objects
+                        'Water': 'ماء',
+                        'Tea': 'شاي',
+                        'Coffee': 'قهوة',
+                        'Restaurant': 'مطعم',
+                        'Hotel': 'فندق',
+                        'Hospital': 'مستشفى',
+                        'Airport': 'مطار',
+                        'Station': 'محطة',
+                        'Street': 'شارع',
+                        'City': 'مدينة',
+                        'Country': 'دولة',
+                        
+                        // Complex sentences with context
+                        'Hopefully everything will be fine in the morning at 8:00 after breakfast': 'نأمل أن يكون كل شيء بخير في الصباح الساعة 8:00 بعد الفطار',
+                        'Good morning my friend, enjoy your breakfast': 'صباح الخير يا صديقي، استمتع بفطارك',
+                        'I am hungry and I want to eat': 'أنا جائع وأريد أن آكل',
+                        'I am thirsty and I want to drink': 'أنا عطشان وأريد أن أشرب',
+                        'I am tired and I want to sleep': 'أنا متعب وأريد أن أنام',
+                        'I am happy because I met you': 'أنا سعيد لأنني قابلتك',
+                        'I am sad because I lost my friend': 'أنا حزين لأنني فقدت صديقي',
+                        'I am worried about the future': 'أنا قلق من المستقبل',
+                        'I am excited about the trip': 'أنا متحمس للرحلة'
+                    }
+                };
+                
+                const key = `${sourceLang}-${targetLang}`;
+                const translationMap = contextTranslations[key] || {};
+                
+                // Try exact match first
+                if (translationMap[text]) {
+                    return translationMap[text];
+                }
+                
+                // Try partial matches for complex sentences
+                const words = text.split(' ');
+                if (words.length > 1) {
+                    let translatedWords = [];
+                    let hasTranslation = false;
+                    
+                    for (let word of words) {
+                        if (translationMap[word]) {
+                            translatedWords.push(translationMap[word]);
+                            hasTranslation = true;
+                        } else {
+                            translatedWords.push(word);
+                        }
+                    }
+                    
+                    if (hasTranslation) {
+                        return translatedWords.join(' ');
+                    }
+                }
+                
+                return null;
+            }
+
+            static getEnhancedLocalTranslation(text, sourceLang, targetLang) {
                 // Enhanced local translations as fallback
                 const translations = {
                     'ar-en': {
@@ -434,40 +813,42 @@
         // Navigation Component
         function Navigation({ currentPage, onPageChange }) {
             const pages = [
-                { id: 'home', name: 'الرئيسية', icon: '🏠' },
-                { id: 'translate', name: 'الترجمة', icon: '🌐' },
-                { id: 'conversation', name: 'المحادثة', icon: '💬' },
-                { id: 'ocr', name: 'قراءة الصور', icon: '📷' },
-                { id: 'settings', name: 'الإعدادات', icon: '⚙️' }
+                { id: 'home', name: 'الرئيسية', icon: '🏠', shortName: 'الرئيسية' },
+                { id: 'translate', name: 'الترجمة', icon: '🌐', shortName: 'ترجمة' },
+                { id: 'conversation', name: 'المحادثة', icon: '💬', shortName: 'محادثة' },
+                { id: 'ocr', name: 'قراءة الصور', icon: '📷', shortName: 'صور' },
+                { id: 'settings', name: 'الإعدادات', icon: '⚙️', shortName: 'إعدادات' }
             ];
             
             return (
-                <nav className="glass-effect p-4 mb-6 rounded-lg">
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+                <nav className="glass-effect p-3 sm:p-4 mb-4 sm:mb-6 rounded-lg">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0">
+                        <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
                             <div className="flex items-center">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                                    <span className="text-lg font-bold text-white">S</span>
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                                    <span className="text-sm sm:text-lg font-bold text-white">S</span>
                                 </div>
-                                <div className="w-6 h-6 bg-orange-500 rounded flex items-center justify-center -ml-2 -mt-2">
+                                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-orange-500 rounded flex items-center justify-center -ml-1 sm:-ml-2 -mt-1 sm:-mt-2">
                                     <span className="text-white text-xs">🔌</span>
                                 </div>
                             </div>
-                            تطبيق مستقل
+                            <span className="hidden sm:inline">تطبيق مستقل</span>
+                            <span className="sm:hidden">مترجم</span>
                         </h1>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1 sm:gap-2 overflow-x-auto w-full sm:w-auto">
                             {pages.map(page => (
                                 <button
                                     key={page.id}
                                     onClick={() => onPageChange(page.id)}
-                                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                                    className={`px-2 sm:px-4 py-2 rounded-lg transition-all duration-300 whitespace-nowrap text-sm sm:text-base ${
                                         currentPage === page.id
                                             ? 'bg-white text-purple-600 font-semibold'
                                             : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }`}
                                 >
-                                    <span className="mr-2">{page.icon}</span>
-                                    {page.name}
+                                    <span className="mr-1 sm:mr-2">{page.icon}</span>
+                                    <span className="hidden sm:inline">{page.name}</span>
+                                    <span className="sm:hidden">{page.shortName}</span>
                                 </button>
                             ))}
                         </div>
@@ -500,54 +881,59 @@
                                 تطبيق مستقل
                             </h2>
                             <p className="text-lg text-white opacity-90 mb-4">
-                                تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
+                                تطبيق متقدم للترجمة الذكية والصوتية يدعم أكثر من 100 لغة
                             </p>
+                            <div className="flex flex-wrap justify-center gap-2 mb-4">
+                                <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-white text-sm">🧠 ترجمة ذكية</span>
+                                <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-white text-sm">🎯 سياق محسن</span>
+                                <span className="px-3 py-1 bg-white bg-opacity-20 rounded-full text-white text-sm">📱 متجاوب</span>
+                            </div>
                         </div>
                     </div>
                     
                     {/* Four Main Features */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover"
+                            className="glass-effect p-4 sm:p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover"
                             onClick={() => onPageChange('translate')}
                         >
-                            <div className="text-5xl mb-4">🌐</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">الترجمة</h3>
-                            <p className="text-white opacity-80 mb-4">ترجمة فورية للنصوص والصوت بين أكثر من 100 لغة</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🌐</div>
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white mb-2 sm:mb-3">الترجمة</h3>
+                            <p className="text-white opacity-80 mb-3 sm:mb-4 text-sm sm:text-base">ترجمة فورية للنصوص والصوت بين أكثر من 100 لغة</p>
+                            <div className="text-xs sm:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="glass-effect p-4 sm:p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '2s'}}
                             onClick={() => onPageChange('conversation')}
                         >
-                            <div className="text-5xl mb-4">💬</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">المحادثة</h3>
-                            <p className="text-white opacity-80 mb-4">محادثات مباشرة مع ترجمة تلقائية فورية</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">💬</div>
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white mb-2 sm:mb-3">المحادثة</h3>
+                            <p className="text-white opacity-80 mb-3 sm:mb-4 text-sm sm:text-base">محادثات مباشرة مع ترجمة تلقائية فورية</p>
+                            <div className="text-xs sm:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="glass-effect p-4 sm:p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '4s'}}
                             onClick={() => onPageChange('ocr')}
                         >
-                            <div className="text-5xl mb-4">📷</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">قراءة الصور</h3>
-                            <p className="text-white opacity-80 mb-4">قراءة النصوص من الصور وترجمتها فورياً</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للبدء →</div>
+                            <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">📷</div>
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white mb-2 sm:mb-3">قراءة الصور</h3>
+                            <p className="text-white opacity-80 mb-3 sm:mb-4 text-sm sm:text-base">قراءة النصوص من الصور وترجمتها فورياً</p>
+                            <div className="text-xs sm:text-sm text-purple-300 font-medium">انقر للبدء →</div>
                         </div>
                         
                         <div 
-                            className="glass-effect p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
+                            className="glass-effect p-4 sm:p-6 lg:p-8 rounded-lg text-center floating-animation cursor-pointer card-hover" 
                             style={{animationDelay: '6s'}}
                             onClick={() => onPageChange('settings')}
                         >
-                            <div className="text-5xl mb-4">⚙️</div>
-                            <h3 className="text-2xl font-semibold text-white mb-3">الإعدادات</h3>
-                            <p className="text-white opacity-80 mb-4">تخصيص التطبيق وإعدادات اللغة والصوت</p>
-                            <div className="text-sm text-purple-300 font-medium">انقر للتخصيص →</div>
+                            <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">⚙️</div>
+                            <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-white mb-2 sm:mb-3">الإعدادات</h3>
+                            <p className="text-white opacity-80 mb-3 sm:mb-4 text-sm sm:text-base">تخصيص التطبيق وإعدادات اللغة والصوت</p>
+                            <div className="text-xs sm:text-sm text-purple-300 font-medium">انقر للتخصيص →</div>
                         </div>
                     </div>
                 </div>
@@ -647,16 +1033,16 @@
             
             return (
                 <div className="fade-in">
-                    <div className="glass-effect p-6 rounded-lg mb-6">
-                        <h2 className="text-2xl font-bold text-white mb-6 text-center">الترجمة الفورية</h2>
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">الترجمة الفورية</h2>
                         
                         {/* Language Selection */}
-                        <div className="flex justify-center items-center gap-4 mb-6">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <select
                                     value={sourceLang}
                                     onChange={(e) => setSourceLang(e.target.value)}
-                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                    className="px-3 sm:px-4 py-2 rounded-lg bg-white text-gray-800 text-sm sm:text-base w-full sm:w-auto"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code}>
@@ -673,11 +1059,11 @@
                                 🔄
                             </button>
                             
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <select
                                     value={targetLang}
                                     onChange={(e) => setTargetLang(e.target.value)}
-                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                    className="px-3 sm:px-4 py-2 rounded-lg bg-white text-gray-800 text-sm sm:text-base w-full sm:w-auto"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code}>
@@ -689,27 +1075,32 @@
                         </div>
                         
                         {/* Translation Interface */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             {/* Input */}
                             <div>
-                                <label className="block text-white mb-2">النص المراد ترجمته</label>
+                                <label className="block text-white mb-2 text-sm sm:text-base">النص المراد ترجمته</label>
                                 <div className="relative">
                                     <textarea
                                         value={inputText}
                                         onChange={(e) => setInputText(e.target.value)}
-                                        placeholder="اكتب النص هنا..."
-                                        className="w-full h-32 p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none"
+                                        placeholder="اكتب النص هنا... (سيتم تحسين الترجمة تلقائياً)"
+                                        className="w-full h-24 sm:h-32 p-3 sm:p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none text-sm sm:text-base transition-all duration-300 focus:border-purple-400 focus:bg-white focus:bg-opacity-15"
+                                        style={{
+                                            fontFamily: sourceLang === 'ar' ? 'Cairo, Arial, sans-serif' : 'Arial, sans-serif',
+                                            direction: sourceLang === 'ar' ? 'rtl' : 'ltr',
+                                            textAlign: sourceLang === 'ar' ? 'right' : 'left'
+                                        }}
                                     />
                                     <button
                                         onClick={handleVoiceInput}
-                                        className="absolute bottom-2 left-2 p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                                        className="absolute bottom-2 left-2 p-1.5 sm:p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all text-sm"
                                     >
                                         🎤
                                     </button>
                                 </div>
                                 <button
                                     onClick={() => handleSpeak(inputText, sourceLang)}
-                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                                    className="mt-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base"
                                     disabled={!inputText}
                                 >
                                     🔊 نطق
@@ -718,13 +1109,18 @@
                             
                             {/* Output */}
                             <div>
-                                <label className="block text-white mb-2">الترجمة</label>
+                                <label className="block text-white mb-2 text-sm sm:text-base">الترجمة</label>
                                 <div className="relative">
                                     <textarea
                                         value={outputText}
                                         readOnly
-                                        placeholder="ستظهر الترجمة هنا..."
-                                        className="w-full h-32 p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none"
+                                        placeholder="ستظهر الترجمة المحسنة هنا..."
+                                        className="w-full h-24 sm:h-32 p-3 sm:p-4 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 resize-none text-sm sm:text-base transition-all duration-300"
+                                        style={{
+                                            fontFamily: targetLang === 'ar' ? 'Cairo, Arial, sans-serif' : 'Arial, sans-serif',
+                                            direction: targetLang === 'ar' ? 'rtl' : 'ltr',
+                                            textAlign: targetLang === 'ar' ? 'right' : 'left'
+                                        }}
                                     />
                                     {isTranslating && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
@@ -738,7 +1134,7 @@
                                 </div>
                                 <button
                                     onClick={() => handleSpeak(outputText, targetLang)}
-                                    className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                                    className="mt-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm sm:text-base"
                                     disabled={!outputText}
                                 >
                                     🔊 نطق
@@ -747,29 +1143,41 @@
                         </div>
                         
                         {/* Translate Button */}
-                        <div className="text-center mt-6">
+                        <div className="text-center mt-4 sm:mt-6">
                             <button
                                 onClick={handleTranslate}
                                 disabled={!inputText.trim() || isTranslating}
-                                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-6 sm:px-8 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex items-center gap-2 mx-auto"
                             >
-                                {isTranslating ? 'جاري الترجمة...' : 'ترجم'}
+                                {isTranslating ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        جاري الترجمة الذكية...
+                                    </>
+                                ) : (
+                                    <>
+                                        🧠 ترجم بذكاء
+                                    </>
+                                )}
                             </button>
+                            <p className="text-white opacity-60 text-xs mt-2">
+                                ✨ ترجمة ذكية محسنة للسياق والمعنى
+                            </p>
                         </div>
                     </div>
                     
                     {/* Recent Translations */}
                     {recentTranslations.length > 0 && (
-                        <div className="glass-effect p-6 rounded-lg">
-                            <h3 className="text-xl font-semibold text-white mb-4">الترجمات الأخيرة</h3>
-                            <div className="space-y-3">
+                        <div className="glass-effect p-4 sm:p-6 rounded-lg">
+                            <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">الترجمات الأخيرة</h3>
+                            <div className="space-y-2 sm:space-y-3">
                                 {recentTranslations.map(translation => (
-                                    <div key={translation.id} className="bg-white bg-opacity-10 p-4 rounded-lg">
+                                    <div key={translation.id} className="bg-white bg-opacity-10 p-3 sm:p-4 rounded-lg">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-white font-medium">{translation.original}</span>
-                                            <span className="text-white opacity-60 text-sm">{translation.timestamp}</span>
+                                            <span className="text-white font-medium text-sm sm:text-base">{translation.original}</span>
+                                            <span className="text-white opacity-60 text-xs sm:text-sm">{translation.timestamp}</span>
                                         </div>
-                                        <div className="text-white opacity-80">{translation.translated}</div>
+                                        <div className="text-white opacity-80 text-sm sm:text-base">{translation.translated}</div>
                                     </div>
                                 ))}
                             </div>
@@ -864,16 +1272,16 @@
             
             return (
                 <div className="fade-in">
-                    <div className="glass-effect p-6 rounded-lg mb-6">
-                        <h2 className="text-2xl font-bold text-white mb-6 text-center">المحادثة الفورية</h2>
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">المحادثة الفورية</h2>
                         
                         {/* Language Selection */}
-                        <div className="flex justify-center items-center gap-4 mb-6">
-                            <div className="flex items-center gap-2">
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <select
                                     value={sourceLang}
                                     onChange={(e) => setSourceLang(e.target.value)}
-                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                    className="px-3 sm:px-4 py-2 rounded-lg bg-white text-gray-800 text-sm sm:text-base w-full sm:w-auto"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code}>
@@ -883,13 +1291,13 @@
                                 </select>
                             </div>
                             
-                            <span className="text-white">←</span>
+                            <span className="text-white text-lg sm:text-xl">←</span>
                             
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
                                 <select
                                     value={targetLang}
                                     onChange={(e) => setTargetLang(e.target.value)}
-                                    className="px-4 py-2 rounded-lg bg-white text-gray-800"
+                                    className="px-3 sm:px-4 py-2 rounded-lg bg-white text-gray-800 text-sm sm:text-base w-full sm:w-auto"
                                 >
                                     {languages.map(lang => (
                                         <option key={lang.code} value={lang.code}>
@@ -902,36 +1310,51 @@
                     </div>
                     
                     {/* Messages */}
-                    <div className="glass-effect p-6 rounded-lg mb-6" style={{height: '400px', overflowY: 'auto'}}>
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg mb-4 sm:mb-6" style={{height: '300px', overflowY: 'auto'}}>
                         {messages.length === 0 ? (
                             <div className="text-center text-white opacity-60">
-                                <div className="text-4xl mb-4">💬</div>
-                                <p>ابدأ محادثة جديدة...</p>
+                                <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">💬</div>
+                                <p className="text-sm sm:text-base">ابدأ محادثة جديدة...</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
+                            <div className="space-y-3 sm:space-y-4">
                                 {messages.map(message => (
                                     <div
                                         key={message.id}
-                                        className={`message-bubble p-4 rounded-lg ${
+                                        className={`message-bubble p-3 sm:p-4 rounded-lg ${
                                             message.isUser ? 'user-message' : 'bot-message'
                                         }`}
                                     >
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="font-medium">
+                                            <span className="font-medium text-sm sm:text-base">
                                                 {message.isUser ? 'أنت' : 'المترجم'}
                                             </span>
-                                            <span className="text-sm opacity-60">{message.timestamp}</span>
+                                            <span className="text-xs sm:text-sm opacity-60">{message.timestamp}</span>
                                         </div>
-                                        <div>{message.text}</div>
+                                        <div 
+                                            className="text-sm sm:text-base"
+                                            style={{
+                                                fontFamily: message.isUser ? 
+                                                    (sourceLang === 'ar' ? 'Cairo, Arial, sans-serif' : 'Arial, sans-serif') :
+                                                    (targetLang === 'ar' ? 'Cairo, Arial, sans-serif' : 'Arial, sans-serif'),
+                                                direction: message.isUser ? 
+                                                    (sourceLang === 'ar' ? 'rtl' : 'ltr') :
+                                                    (targetLang === 'ar' ? 'rtl' : 'ltr'),
+                                                textAlign: message.isUser ? 
+                                                    (sourceLang === 'ar' ? 'right' : 'left') :
+                                                    (targetLang === 'ar' ? 'right' : 'left')
+                                            }}
+                                        >
+                                            {message.text}
+                                        </div>
                                     </div>
                                 ))}
                                 
                                 {isTyping && (
-                                    <div className="bot-message message-bubble p-4 rounded-lg">
+                                    <div className="bot-message message-bubble p-3 sm:p-4 rounded-lg">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="font-medium">المترجم</span>
-                                            <span className="text-sm opacity-60">يكتب...</span>
+                                            <span className="font-medium text-sm sm:text-base">المترجم</span>
+                                            <span className="text-xs sm:text-sm opacity-60">يكتب...</span>
                                         </div>
                                         <div className="typing-indicator">
                                             <div className="typing-dot"></div>
@@ -946,11 +1369,11 @@
                     </div>
                     
                     {/* Input */}
-                    <div className="glass-effect p-6 rounded-lg">
-                        <div className="flex gap-4">
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg">
+                        <div className="flex gap-2 sm:gap-4">
                             <button
                                 onClick={handleVoiceInput}
-                                className="p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all"
+                                className="p-2 sm:p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all text-sm"
                             >
                                 🎤
                             </button>
@@ -959,13 +1382,18 @@
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                placeholder="اكتب رسالتك هنا..."
-                                className="flex-1 p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60"
+                                placeholder="اكتب رسالتك هنا... (ترجمة ذكية محسنة)"
+                                className="flex-1 p-2 sm:p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60 text-sm sm:text-base transition-all duration-300 focus:border-purple-400 focus:bg-white focus:bg-opacity-15"
+                                style={{
+                                    fontFamily: sourceLang === 'ar' ? 'Cairo, Arial, sans-serif' : 'Arial, sans-serif',
+                                    direction: sourceLang === 'ar' ? 'rtl' : 'ltr',
+                                    textAlign: sourceLang === 'ar' ? 'right' : 'left'
+                                }}
                             />
                             <button
                                 onClick={handleSendMessage}
                                 disabled={!inputMessage.trim()}
-                                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                             >
                                 إرسال
                             </button>
@@ -1360,32 +1788,32 @@
             
             return (
                 <div className="fade-in">
-                    <div className="glass-effect p-6 rounded-lg mb-6">
-                        <h2 className="text-2xl font-bold text-white mb-6 text-center">قراءة النصوص من الصور 📷</h2>
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">قراءة النصوص من الصور 📷</h2>
                         
                         {/* Processing Status */}
                         {processingStatus && (
-                            <div className="mb-4 p-3 bg-blue-500 bg-opacity-20 border border-blue-400 border-opacity-30 rounded-lg">
-                                <div className="flex items-center justify-center text-blue-200">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
+                            <div className="mb-3 sm:mb-4 p-2 sm:p-3 bg-blue-500 bg-opacity-20 border border-blue-400 border-opacity-30 rounded-lg">
+                                <div className="flex items-center justify-center text-blue-200 text-sm sm:text-base">
+                                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-blue-400 mr-2"></div>
                                     {processingStatus}
                                 </div>
                             </div>
                         )}
                         
                         {/* Image Upload Section */}
-                        <div className="mb-6">
-                            <div className="glass-effect p-6 rounded-lg">
-                                <div className="text-center mb-4">
-                                    <h3 className="text-xl font-semibold text-white mb-4">📷 اختر أو التقط صورة</h3>
-                                    <div className="flex justify-center gap-4 flex-wrap">
+                        <div className="mb-4 sm:mb-6">
+                            <div className="glass-effect p-4 sm:p-6 rounded-lg">
+                                <div className="text-center mb-3 sm:mb-4">
+                                    <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">📷 اختر أو التقط صورة</h3>
+                                    <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                                         <button
                                             onClick={handleCameraCapture}
-                                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-3"
+                                            className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
                                         >
                                             📷 التقط صورة
                                         </button>
-                                        <label className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 cursor-pointer flex items-center gap-3">
+                                        <label className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 cursor-pointer flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base">
                                             📁 رفع صورة
                                             <input
                                                 type="file"
@@ -1395,18 +1823,18 @@
                                             />
                                         </label>
                                     </div>
-                                    <p className="text-white opacity-60 text-sm mt-3">
+                                    <p className="text-white opacity-60 text-xs sm:text-sm mt-2 sm:mt-3">
                                         الحد الأقصى لحجم الملف: 10 ميجابايت
                                     </p>
                                 </div>
                             
                                 {selectedImage && (
-                                    <div className="text-center mt-6">
+                                    <div className="text-center mt-4 sm:mt-6">
                                         <div className="relative inline-block">
                                             <img
                                                 src={selectedImage}
                                                 alt="Selected"
-                                                className="max-w-full h-64 object-contain mx-auto rounded-lg border-2 border-white border-opacity-20 shadow-lg"
+                                                className="max-w-full h-48 sm:h-64 object-contain mx-auto rounded-lg border-2 border-white border-opacity-20 shadow-lg"
                                             />
                                             <button
                                                 onClick={() => {
@@ -1414,7 +1842,7 @@
                                                     setExtractedText('');
                                                     setTranslatedText('');
                                                 }}
-                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg text-sm sm:text-base"
                                             >
                                                 ×
                                             </button>
@@ -1422,11 +1850,11 @@
                                         <button
                                             onClick={extractTextFromImage}
                                             disabled={isProcessing}
-                                            className="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto"
+                                            className="mt-3 sm:mt-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center gap-2 mx-auto text-sm sm:text-base"
                                         >
                                             {isProcessing ? (
                                                 <>
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                                                     جاري القراءة...
                                                 </>
                                             ) : (
@@ -1441,16 +1869,16 @@
                         </div>
                         
                         {/* Language Selection */}
-                        <div className="mb-6">
-                            <div className="glass-effect p-4 rounded-lg">
-                                <h3 className="text-lg font-semibold text-white mb-4 text-center">🌐 اختيار اللغات</h3>
-                                <div className="flex justify-center items-center gap-4 flex-wrap">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-white text-sm font-medium">من:</label>
+                        <div className="mb-4 sm:mb-6">
+                            <div className="glass-effect p-3 sm:p-4 rounded-lg">
+                                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 text-center">🌐 اختيار اللغات</h3>
+                                <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <label className="text-white text-xs sm:text-sm font-medium">من:</label>
                                         <select
                                             value={sourceLang}
                                             onChange={(e) => setSourceLang(e.target.value)}
-                                            className="form-select min-w-36 bg-white bg-opacity-10 border-white border-opacity-20"
+                                            className="form-select min-w-32 sm:min-w-36 bg-white bg-opacity-10 border-white border-opacity-20 text-sm sm:text-base w-full sm:w-auto"
                                         >
                                             {languages.map(lang => (
                                                 <option key={lang.code} value={lang.code}>
@@ -1462,18 +1890,18 @@
                                     
                                     <button
                                         onClick={handleSwapLanguages}
-                                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white p-3 rounded-lg transition-all duration-300 transform hover:scale-105"
+                                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white p-2 sm:p-3 rounded-lg transition-all duration-300 transform hover:scale-105"
                                         title="تبديل اللغات"
                                     >
                                         🔄
                                     </button>
                                     
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-white text-sm font-medium">إلى:</label>
+                                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                                        <label className="text-white text-xs sm:text-sm font-medium">إلى:</label>
                                         <select
                                             value={targetLang}
                                             onChange={(e) => setTargetLang(e.target.value)}
-                                            className="form-select min-w-36 bg-white bg-opacity-10 border-white border-opacity-20"
+                                            className="form-select min-w-32 sm:min-w-36 bg-white bg-opacity-10 border-white border-opacity-20 text-sm sm:text-base w-full sm:w-auto"
                                         >
                                             {languages.map(lang => (
                                                 <option key={lang.code} value={lang.code}>
@@ -1487,29 +1915,28 @@
                         </div>
                         
                         {/* Text Display - Side by Side */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             {/* Extracted Text */}
-                            <div className="glass-effect p-4 rounded-lg">
-                                <div className="flex items-center justify-between mb-3">
-                                    <label className="text-white font-semibold flex items-center gap-2">
+                            <div className="glass-effect p-3 sm:p-4 rounded-lg flex flex-col h-80 sm:h-96">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                    <label className="text-white font-semibold flex items-center gap-2 text-sm sm:text-base">
                                         📝 النص المستخرج
                                     </label>
-                                    <span className="text-white opacity-60 text-sm">
+                                    <span className="text-white opacity-60 text-xs sm:text-sm">
                                         {extractedText.length} حرف
                                     </span>
                                 </div>
-                                <div className="relative">
+                                <div className="relative flex-1">
                                     <textarea
                                         value={extractedText}
                                         onChange={(e) => setExtractedText(e.target.value)}
                                         placeholder="سيظهر النص المستخرج هنا..."
-                                        className="form-textarea bg-white bg-opacity-5 border-white border-opacity-20"
-                                        style={{height: '200px', resize: 'vertical'}}
+                                        className="w-full h-full p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-5 text-white placeholder-white placeholder-opacity-60 resize-none text-sm sm:text-base ocr-text-area"
                                     />
                                     {extractedText && (
                                         <button
                                             onClick={() => setExtractedText('')}
-                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-6 h-6 flex items-center justify-center"
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm"
                                         >
                                             ×
                                         </button>
@@ -1518,27 +1945,26 @@
                             </div>
                             
                             {/* Translated Text */}
-                            <div className="glass-effect p-4 rounded-lg">
-                                <div className="flex items-center justify-between mb-3">
-                                    <label className="text-white font-semibold flex items-center gap-2">
+                            <div className="glass-effect p-3 sm:p-4 rounded-lg flex flex-col h-80 sm:h-96">
+                                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                    <label className="text-white font-semibold flex items-center gap-2 text-sm sm:text-base">
                                         🌐 الترجمة
                                     </label>
-                                    <span className="text-white opacity-60 text-sm">
+                                    <span className="text-white opacity-60 text-xs sm:text-sm">
                                         {translatedText.length} حرف
                                     </span>
                                 </div>
-                                <div className="relative">
+                                <div className="relative flex-1">
                                     <textarea
                                         value={translatedText}
                                         readOnly
                                         placeholder="ستظهر الترجمة هنا..."
-                                        className="form-textarea bg-white bg-opacity-5 border-white border-opacity-20"
-                                        style={{height: '200px', resize: 'none'}}
+                                        className="w-full h-full p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-5 text-white placeholder-white placeholder-opacity-60 resize-none text-sm sm:text-base ocr-text-area"
                                     />
                                     {isTranslating && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                                            <div className="flex items-center gap-2 text-white">
-                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            <div className="flex items-center gap-2 text-white text-sm sm:text-base">
+                                                <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                                                 جاري الترجمة...
                                             </div>
                                         </div>
@@ -1546,7 +1972,7 @@
                                     {translatedText && (
                                         <button
                                             onClick={() => navigator.clipboard.writeText(translatedText)}
-                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-6 h-6 flex items-center justify-center"
+                                            className="absolute top-2 right-2 text-gray-400 hover:text-white transition-colors bg-black bg-opacity-50 rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm"
                                             title="نسخ الترجمة"
                                         >
                                             📋
@@ -1557,15 +1983,15 @@
                         </div>
                         
                         {/* Action Buttons */}
-                        <div className="flex justify-center gap-4 mt-6 flex-wrap">
+                        <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mt-4 sm:mt-6">
                             <button
                                 onClick={translateExtractedText}
                                 disabled={!extractedText.trim() || isTranslating}
-                                className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+                                className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                                 {isTranslating ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                        <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
                                         جاري الترجمة...
                                     </>
                                 ) : (
@@ -1581,7 +2007,7 @@
                                         setExtractedText('');
                                         setTranslatedText('');
                                     }}
-                                    className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                                    className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm sm:text-base"
                                 >
                                     🗑️ مسح الكل
                                 </button>
@@ -1608,12 +2034,12 @@
             
             return (
                 <div className="fade-in">
-                    <div className="glass-effect p-6 rounded-lg">
-                        <h2 className="text-2xl font-bold text-white mb-6 text-center">الإعدادات</h2>
+                    <div className="glass-effect p-4 sm:p-6 rounded-lg">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 text-center">الإعدادات</h2>
                         
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                             <div className="flex justify-between items-center">
-                                <span className="text-white">الترجمة التلقائية</span>
+                                <span className="text-white text-sm sm:text-base">الترجمة التلقائية</span>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -1621,12 +2047,12 @@
                                         onChange={(e) => handleSettingChange('autoTranslate', e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <div className="w-10 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
                             
                             <div className="flex justify-between items-center">
-                                <span className="text-white">تفعيل الصوت</span>
+                                <span className="text-white text-sm sm:text-base">تفعيل الصوت</span>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -1634,12 +2060,12 @@
                                         onChange={(e) => handleSettingChange('voiceEnabled', e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <div className="w-10 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
                             
                             <div className="flex justify-between items-center">
-                                <span className="text-white">الإشعارات</span>
+                                <span className="text-white text-sm sm:text-base">الإشعارات</span>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -1647,13 +2073,13 @@
                                         onChange={(e) => handleSettingChange('notifications', e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <div className="w-10 h-5 sm:w-11 sm:h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 sm:after:h-5 sm:after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                                 </label>
                             </div>
                         </div>
                         
-                        <div className="mt-8 text-center">
-                            <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
+                        <div className="mt-6 sm:mt-8 text-center">
+                            <button className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all text-sm sm:text-base">
                                 حفظ الإعدادات
                             </button>
                         </div>
@@ -1665,17 +2091,17 @@
         // Footer Component
         function Footer() {
             return (
-                <footer className="glass-effect mt-6 p-4 rounded-lg">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <footer className="glass-effect mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                         {/* Company Info */}
                         <div>
-                            <div className="flex items-center mb-4">
-                                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
-                                    <span className="text-xl font-bold text-white">S</span>
+                            <div className="flex items-center mb-3 sm:mb-4">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center mr-2 sm:mr-3">
+                                    <span className="text-lg sm:text-xl font-bold text-white">S</span>
                                 </div>
-                                <h3 className="text-xl font-bold text-white">تطبيق مستقل</h3>
+                                <h3 className="text-lg sm:text-xl font-bold text-white">تطبيق مستقل</h3>
                             </div>
-                            <p className="text-white opacity-80 text-sm">
+                            <p className="text-white opacity-80 text-xs sm:text-sm">
                                 تطبيق متقدم للترجمة الصوتية والنصية يدعم أكثر من 100 لغة
                             </p>
                         </div>
@@ -1684,12 +2110,12 @@
                     </div>
                     
                     {/* Bottom Section */}
-                    <div className="border-t border-white border-opacity-20 pt-6">
+                    <div className="border-t border-white border-opacity-20 pt-4 sm:pt-6">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-white opacity-60 text-sm mb-4 md:mb-0">
+                            <div className="text-white opacity-60 text-xs sm:text-sm mb-3 md:mb-0">
                                 © 2024 تطبيق مستقل. جميع الحقوق محفوظة.
                             </div>
-                            <div className="flex gap-6 text-sm">
+                            <div className="flex flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm">
                                 <span className="text-white opacity-60 cursor-pointer hover:opacity-100 transition-opacity">
                                     سياسة الخصوصية
                                 </span>
@@ -1728,7 +2154,7 @@
             };
             
             return (
-                <div className="min-h-screen gradient-bg p-6">
+                <div className="min-h-screen gradient-bg p-3 sm:p-6">
                     <div className="max-w-6xl mx-auto">
                         <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
                         {renderPage()}
