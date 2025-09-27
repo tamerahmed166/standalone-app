@@ -2289,6 +2289,10 @@
             const [inputMessage, setInputMessage] = useState('');
             const [messageType, setMessageType] = useState('text'); // 'text' or 'voice'
             const [isSending, setIsSending] = useState(false);
+            const [isCallActive, setIsCallActive] = useState(false);
+            const [localStream, setLocalStream] = useState(null);
+            const [remoteStream, setRemoteStream] = useState(null);
+            const [peerConnection, setPeerConnection] = useState(null);
             
             const recognition = useRef(null);
             const synthesis = useRef(null);
@@ -2296,6 +2300,8 @@
             const analyser = useRef(null);
             const microphone = useRef(null);
             const animationFrame = useRef(null);
+            const localVideoRef = useRef(null);
+            const remoteVideoRef = useRef(null);
             
             const languages = [
                 { code: 'ar', name: 'العربية', flag: '🇸🇦' },
@@ -2401,8 +2407,8 @@
                 setInputMessage(text);
                 setMessageType('voice');
                 
-                // إرسال الرسالة مباشرة مع النص
-                await sendVoiceMessage(text);
+                // إظهار النص في حقل الكتابة أولاً
+                console.log('تم وضع النص في حقل الكتابة:', text);
             };
             
             const sendVoiceMessage = async (text) => {
@@ -2524,6 +2530,116 @@
                 } catch (error) {
                     console.error('Translation error:', error);
                     return text; // Return original text if translation fails
+                }
+            };
+            
+            // WebRTC Functions for Video Call
+            const startVideoCall = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true, 
+                        audio: true 
+                    });
+                    
+                    setLocalStream(stream);
+                    if (localVideoRef.current) {
+                        localVideoRef.current.srcObject = stream;
+                    }
+                    
+                    // Create peer connection
+                    const pc = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' }
+                        ]
+                    });
+                    
+                    setPeerConnection(pc);
+                    
+                    // Add local stream to peer connection
+                    stream.getTracks().forEach(track => {
+                        pc.addTrack(track, stream);
+                    });
+                    
+                    // Handle remote stream
+                    pc.ontrack = (event) => {
+                        const remoteStream = event.streams[0];
+                        setRemoteStream(remoteStream);
+                        if (remoteVideoRef.current) {
+                            remoteVideoRef.current.srcObject = remoteStream;
+                        }
+                    };
+                    
+                    // Handle ICE candidates
+                    pc.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            // Send ICE candidate to remote peer
+                            console.log('ICE candidate:', event.candidate);
+                        }
+                    };
+                    
+                    setIsCallActive(true);
+                    console.log('تم بدء المكالمة المرئية');
+                    
+                } catch (error) {
+                    console.error('خطأ في بدء المكالمة المرئية:', error);
+                    alert('فشل في بدء المكالمة المرئية. تأكد من السماح بالوصول للكاميرا والميكروفون.');
+                }
+            };
+            
+            const endVideoCall = () => {
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    setLocalStream(null);
+                }
+                
+                if (peerConnection) {
+                    peerConnection.close();
+                    setPeerConnection(null);
+                }
+                
+                setRemoteStream(null);
+                setIsCallActive(false);
+                console.log('تم إنهاء المكالمة المرئية');
+            };
+            
+            const startAudioCall = async () => {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: true 
+                    });
+                    
+                    setLocalStream(stream);
+                    
+                    // Create peer connection for audio only
+                    const pc = new RTCPeerConnection({
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' }
+                        ]
+                    });
+                    
+                    setPeerConnection(pc);
+                    
+                    // Add audio track
+                    const audioTrack = stream.getAudioTracks()[0];
+                    pc.addTrack(audioTrack, stream);
+                    
+                    // Handle remote audio
+                    pc.ontrack = (event) => {
+                        const remoteStream = event.streams[0];
+                        setRemoteStream(remoteStream);
+                        // Play remote audio
+                        const audio = new Audio();
+                        audio.srcObject = remoteStream;
+                        audio.play();
+                    };
+                    
+                    setIsCallActive(true);
+                    console.log('تم بدء المكالمة الصوتية');
+                    
+                } catch (error) {
+                    console.error('خطأ في بدء المكالمة الصوتية:', error);
+                    alert('فشل في بدء المكالمة الصوتية. تأكد من السماح بالوصول للميكروفون.');
                 }
             };
             
@@ -2877,6 +2993,69 @@
                                 )}
                             </div>
                         )}
+                    </div>
+                    
+                    {/* Video Call Interface */}
+                    {isCallActive && (
+                        <div className="glass-effect p-4 rounded-lg mb-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div className="relative">
+                                    <h3 className="text-white mb-2">كاميرتك</h3>
+                                    <video
+                                        ref={localVideoRef}
+                                        autoPlay
+                                        muted
+                                        className="w-full h-48 bg-black rounded-lg"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <h3 className="text-white mb-2">الطرف الآخر</h3>
+                                    <video
+                                        ref={remoteVideoRef}
+                                        autoPlay
+                                        className="w-full h-48 bg-black rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="flex justify-center gap-4 mt-4">
+                                <button
+                                    onClick={endVideoCall}
+                                    className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                                >
+                                    إنهاء المكالمة
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {/* Call Controls */}
+                    <div className="glass-effect p-4 rounded-lg mb-6">
+                        <div className="flex justify-center gap-4">
+                            {!isCallActive ? (
+                                <>
+                                    <button
+                                        onClick={startAudioCall}
+                                        className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
+                                    >
+                                        📞 مكالمة صوتية
+                                    </button>
+                                    <button
+                                        onClick={startVideoCall}
+                                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2"
+                                    >
+                                        📹 مكالمة مرئية
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={endVideoCall}
+                                    className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all flex items-center gap-2"
+                                >
+                                    📞 إنهاء المكالمة
+                                </button>
+                            )}
+                        </div>
                     </div>
                     
                     {/* WhatsApp-like Input */}
