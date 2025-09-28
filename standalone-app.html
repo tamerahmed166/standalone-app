@@ -2282,6 +2282,7 @@
             const [messages, setMessages] = useState([]);
             const [isConnected, setIsConnected] = useState(false);
             const [connectionState, setConnectionState] = useState('disconnected');
+            const [currentRoomId, setCurrentRoomId] = useState('');
             const [otherUser, setOtherUser] = useState(null);
             const [isTyping, setIsTyping] = useState(false);
             const [sourceLang, setSourceLang] = useState('ar');
@@ -2593,7 +2594,7 @@
                     return false;
                 }
             };
-
+            
             // WebRTC Functions for Video Call
             const startVideoCall = async () => {
                 try {
@@ -2752,23 +2753,23 @@
             const endVideoCall = () => {
                 try {
                     // Stop local stream
-                    if (localStream) {
+                if (localStream) {
                         localStream.getTracks().forEach(track => {
                             track.stop();
                             console.log('Stopped track:', track.kind);
                         });
-                        setLocalStream(null);
-                    }
-                    
+                    setLocalStream(null);
+                }
+                
                     // Close peer connection
-                    if (peerConnection) {
-                        peerConnection.close();
-                        setPeerConnection(null);
-                    }
-                    
+                if (peerConnection) {
+                    peerConnection.close();
+                    setPeerConnection(null);
+                }
+                
                     // Clear remote stream
-                    setRemoteStream(null);
-                    setIsCallActive(false);
+                setRemoteStream(null);
+                setIsCallActive(false);
                     
                     // Clear video elements
                     if (localVideoRef.current) {
@@ -2785,7 +2786,7 @@
                         roomRef = null;
                     }
                     
-                    console.log('تم إنهاء المكالمة المرئية');
+                console.log('تم إنهاء المكالمة المرئية');
                 } catch (error) {
                     console.error('خطأ في إنهاء المكالمة:', error);
                 }
@@ -2913,12 +2914,14 @@
             const createNewRoom = () => {
                 const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 setRoomCode(newRoomCode);
+                setCurrentRoomId(newRoomCode);
                 setCurrentView('create-room');
             };
             
             const joinRoom = () => {
                 if (/^[A-Z0-9]{6}$/.test(inputRoomCode)) {
                     setRoomCode(inputRoomCode);
+                    setCurrentRoomId(inputRoomCode);
                     setCurrentView('chat');
                     // محاكاة الاتصال
                     setConnectionState('connecting');
