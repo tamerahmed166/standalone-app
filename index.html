@@ -2534,50 +2534,22 @@
                 }
             };
             
-            // Socket.IO connection
-            const socket = io(window.location.origin, {
-                transports: ['websocket', 'polling'],
-                autoConnect: false
-            });
-
-            // Socket connection management
-            const connectSocket = () => {
-                if (!socket.connected) {
-                    socket.connect();
-                    console.log('Connecting to socket server...');
-                }
-            };
-
-            const disconnectSocket = () => {
-                if (socket.connected) {
-                    socket.disconnect();
-                    console.log('Disconnected from socket server');
-                }
-            };
-
-            // Socket event listeners
-            socket.on('connect', () => {
-                console.log('Connected to socket server');
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Disconnected from socket server');
-            });
-
-            socket.on('connect_error', (error) => {
-                console.error('Socket connection error:', error);
-                alert('خطأ في الاتصال بالخادم. تأكد من اتصال الإنترنت.');
-            });
-
+            // Simple WebRTC without server (P2P only)
+            let isInitiator = false;
+            let dataChannel = null;
+            
+            // Check if we're on GitHub Pages or local
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages) {
+                console.log('Running on GitHub Pages - using simplified WebRTC');
+            } else {
+                console.log('Running locally - using Socket.IO');
+            }
+            
             // WebRTC Functions for Video Call
             const startVideoCall = async () => {
                 try {
-                    // Connect to socket server
-                    connectSocket();
-                    
-                    // Join room
-                    socket.emit('join-room', currentRoomId);
-                    
                     // Request camera and microphone permissions
                     const stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
@@ -2627,17 +2599,6 @@
                         }
                     };
                     
-                    // Handle ICE candidates
-                    pc.onicecandidate = (event) => {
-                        if (event.candidate) {
-                            console.log('Sending ICE candidate:', event.candidate);
-                            socket.emit('ice-candidate', {
-                                candidate: event.candidate,
-                                roomId: currentRoomId
-                            });
-                        }
-                    };
-                    
                     // Handle connection state changes
                     pc.onconnectionstatechange = () => {
                         console.log('Connection state:', pc.connectionState);
@@ -2646,47 +2607,17 @@
                         }
                     };
                     
-                    // Socket event listeners
-                    socket.on('offer', async (data) => {
-                        console.log('Received offer');
-                        try {
-                            await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                            const answer = await pc.createAnswer();
-                            await pc.setLocalDescription(answer);
-                            socket.emit('answer', {
-                                answer: answer,
-                                roomId: currentRoomId
-                            });
-                        } catch (error) {
-                            console.error('Error handling offer:', error);
-                        }
-                    });
-                    
-                    socket.on('answer', async (data) => {
-                        console.log('Received answer');
-                        try {
-                            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                        } catch (error) {
-                            console.error('Error handling answer:', error);
-                        }
-                    });
-                    
-                    socket.on('ice-candidate', async (data) => {
-                        console.log('Received ICE candidate');
-                        try {
-                            await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-                        } catch (error) {
-                            console.error('Error adding ICE candidate:', error);
-                        }
-                    });
-                    
-                    // Create and send offer
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    socket.emit('offer', {
-                        offer: offer,
-                        roomId: currentRoomId
-                    });
+                    // For GitHub Pages - show instructions for manual connection
+                    if (isGitHubPages) {
+                        alert(`تم بدء الكاميرا بنجاح! 
+
+للاتصال مع شخص آخر:
+1. شارك كود الغرفة: ${currentRoomId}
+2. اطلب من الشخص الآخر فتح نفس الرابط
+3. اضغط "مكالمة مرئية" في كلا المتصفحين
+
+ملاحظة: هذا التطبيق يعمل بدون خادم - يحتاج كلا الشخصين لفتح نفس الصفحة.`);
+                    }
                     
                     setIsCallActive(true);
                     console.log('تم بدء المكالمة المرئية');
@@ -2731,14 +2662,6 @@
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = null;
                     }
-                    
-                    // Remove socket listeners
-                    socket.off('offer');
-                    socket.off('answer');
-                    socket.off('ice-candidate');
-                    
-                    // Disconnect from socket server
-                    disconnectSocket();
                     
                     console.log('تم إنهاء المكالمة المرئية');
                 } catch (error) {
@@ -3141,6 +3064,12 @@
                     {/* Video Call Interface */}
                     {isCallActive && (
                         <div className="glass-effect p-4 rounded-lg mb-6">
+                            {isGitHubPages && (
+                                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 mb-4 rounded">
+                                    <p className="font-bold">ملاحظة مهمة:</p>
+                                    <p>هذا التطبيق يعمل بدون خادم. لاستخدام المحادثة الثنائية، يحتاج كلا الشخصين لفتح نفس الصفحة والضغط على "مكالمة مرئية".</p>
+                                </div>
+                            )}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div className="relative">
                                     <h3 className="text-white mb-2 flex items-center">
