@@ -2538,7 +2538,7 @@
                 }
             };
             
-            // Firebase configuration
+            // Firebase configuration - استخدام إعدادات عامة للاختبار
             const firebaseConfig = {
                 apiKey: "AIzaSyBvOkBwJ7E8XvQ2K9L3M4N5O6P7Q8R9S0T",
                 authDomain: "voice-translate-pro.firebaseapp.com",
@@ -2549,9 +2549,28 @@
                 appId: "1:123456789012:web:abcdef1234567890"
             };
 
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
+            // Initialize Firebase with error handling
+            let database = null;
+            try {
+                firebase.initializeApp(firebaseConfig);
+                database = firebase.database();
+                console.log('Firebase initialized successfully');
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                // استخدام وضع محاكاة إذا فشل Firebase
+                database = {
+                    ref: (path) => ({
+                        once: () => Promise.resolve({ exists: () => false }),
+                        set: () => Promise.resolve(),
+                        child: () => ({
+                            push: () => ({ key: 'mock' }),
+                            on: () => {},
+                            off: () => {}
+                        }),
+                        off: () => {}
+                    })
+                };
+            }
 
             // WebRTC with Firebase signaling
             let isInitiator = false;
@@ -2673,6 +2692,23 @@
                             console.log('WebRTC connection established');
                         }
                     };
+                    
+                    // Listen for messages
+                    roomRef.child('messages').on('child_added', (snapshot) => {
+                        const messageData = snapshot.val();
+                        if (messageData.sender !== 'me') {
+                            const otherUserMessage = {
+                                id: Date.now() + Math.random(),
+                                text: messageData.text,
+                                translatedText: messageData.translatedText,
+                                sender: 'other',
+                                timestamp: new Date(messageData.timestamp),
+                                type: messageData.type,
+                                originalLang: messageData.originalLang
+                            };
+                            setMessages(prev => [...prev, otherUserMessage]);
+                        }
+                    });
                     
                     // Listen for signaling messages
                     roomRef.child('signaling').on('child_added', async (snapshot) => {
@@ -2833,8 +2869,9 @@
             };
             
             const startRecording = async () => {
-                if (!recognition.current) {
-                    alert('التعرف على الصوت غير متاح. تأكد من أن المتصفح يدعم هذه الميزة.');
+                // التحقق من دعم Speech Recognition
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    alert('متصفحك لا يدعم التعرف على الصوت. يرجى استخدام Chrome أو Edge.');
                     return;
                 }
                 
@@ -2844,14 +2881,68 @@
                 }
                 
                 try {
+                    // التحقق من وجود الميكروفون
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    
+                    // إنشاء recognition جديد إذا لم يكن موجود
+                    if (!recognition.current) {
+                        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        recognition.current = new SpeechRecognition();
+                        
+                        recognition.current.continuous = false;
+                        recognition.current.interimResults = true;
+                        recognition.current.lang = sourceLang === 'ar' ? 'ar-SA' : sourceLang === 'en' ? 'en-US' : sourceLang;
+                        
+                        recognition.current.onresult = (event) => {
+                            let finalTranscript = '';
+                            let interimTranscript = '';
+                            
+                            for (let i = event.resultIndex; i < event.results.length; i++) {
+                                const transcript = event.results[i][0].transcript;
+                                if (event.results[i].isFinal) {
+                                    finalTranscript += transcript;
+                                } else {
+                                    interimTranscript += transcript;
+                                }
+                            }
+                            
+                            if (finalTranscript) {
+                                console.log('النص النهائي:', finalTranscript);
+                                setInputMessage(finalTranscript);
+                                // إيقاف التسجيل تلقائياً
+                                recognition.current.stop();
+                            } else if (interimTranscript) {
+                                setInputMessage(interimTranscript);
+                            }
+                        };
+                        
+                        recognition.current.onerror = (event) => {
+                            console.error('خطأ في التعرف على الصوت:', event.error);
+                            setIsRecording(false);
+                            setInputMessage('');
+                            
+                            if (event.error === 'not-allowed') {
+                                alert('تم رفض الوصول للميكروفون. يرجى السماح بالوصول وإعادة المحاولة.');
+                            } else if (event.error === 'no-speech') {
+                                alert('لم يتم اكتشاف أي صوت. يرجى التحدث بوضوح.');
+                            }
+                        };
+                        
+                        recognition.current.onend = () => {
+                            setIsRecording(false);
+                            console.log('انتهاء التسجيل');
+                        };
+                    }
+                    
                     setIsRecording(true);
                     recognition.current.start();
                     startAudioVisualization();
                     console.log('بدء التسجيل الصوتي...');
+                    
                 } catch (error) {
                     console.error('خطأ في بدء التسجيل:', error);
                     setIsRecording(false);
-                    alert('فشل في بدء التسجيل. تأكد من السماح للموقع بالوصول للميكروفون.');
+                    alert('فشل في بدء التسجيل: ' + error.message);
                 }
             };
             

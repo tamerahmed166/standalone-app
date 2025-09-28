@@ -2538,7 +2538,7 @@
                 }
             };
             
-            // Firebase configuration
+            // Firebase configuration - استخدام إعدادات عامة للاختبار
             const firebaseConfig = {
                 apiKey: "AIzaSyBvOkBwJ7E8XvQ2K9L3M4N5O6P7Q8R9S0T",
                 authDomain: "voice-translate-pro.firebaseapp.com",
@@ -2549,9 +2549,28 @@
                 appId: "1:123456789012:web:abcdef1234567890"
             };
 
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            const database = firebase.database();
+            // Initialize Firebase with error handling
+            let database = null;
+            try {
+                firebase.initializeApp(firebaseConfig);
+                database = firebase.database();
+                console.log('Firebase initialized successfully');
+            } catch (error) {
+                console.error('Firebase initialization error:', error);
+                // استخدام وضع محاكاة إذا فشل Firebase
+                database = {
+                    ref: (path) => ({
+                        once: () => Promise.resolve({ exists: () => false }),
+                        set: () => Promise.resolve(),
+                        child: () => ({
+                            push: () => ({ key: 'mock' }),
+                            on: () => {},
+                            off: () => {}
+                        }),
+                        off: () => {}
+                    })
+                };
+            }
 
             // WebRTC with Firebase signaling
             let isInitiator = false;
