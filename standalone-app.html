@@ -22,6 +22,9 @@
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
         body {
@@ -2534,22 +2537,73 @@
                 }
             };
             
-            // Simple WebRTC without server (P2P only)
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyBvOkBwJ7E8XvQ2K9L3M4N5O6P7Q8R9S0T",
+                authDomain: "voice-translate-pro.firebaseapp.com",
+                databaseURL: "https://voice-translate-pro-default-rtdb.firebaseio.com",
+                projectId: "voice-translate-pro",
+                storageBucket: "voice-translate-pro.appspot.com",
+                messagingSenderId: "123456789012",
+                appId: "1:123456789012:web:abcdef1234567890"
+            };
+
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+
+            // WebRTC with Firebase signaling
             let isInitiator = false;
             let dataChannel = null;
+            let roomRef = null;
             
             // Check if we're on GitHub Pages or local
             const isGitHubPages = window.location.hostname.includes('github.io');
             
             if (isGitHubPages) {
-                console.log('Running on GitHub Pages - using simplified WebRTC');
+                console.log('Running on GitHub Pages - using Firebase + WebRTC');
             } else {
                 console.log('Running locally - using Socket.IO');
             }
 
+            // Firebase signaling functions
+            const createRoom = async () => {
+                try {
+                    roomRef = database.ref(`rooms/${currentRoomId}`);
+                    
+                    // Check if room exists
+                    const snapshot = await roomRef.once('value');
+                    if (snapshot.exists()) {
+                        // Room exists, join as second user
+                        isInitiator = false;
+                        console.log('Joining existing room');
+                    } else {
+                        // Room doesn't exist, create as first user
+                        isInitiator = true;
+                        await roomRef.set({
+                            created: firebase.database.ServerValue.TIMESTAMP,
+                            participants: 1
+                        });
+                        console.log('Created new room');
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Error creating/joining room:', error);
+                    return false;
+                }
+            };
+
             // WebRTC Functions for Video Call
             const startVideoCall = async () => {
                 try {
+                    // Create or join room
+                    const roomCreated = await createRoom();
+                    if (!roomCreated) {
+                        alert('خطأ في إنشاء/الانضمام للغرفة. تأكد من اتصال الإنترنت.');
+                        return;
+                    }
+                    
                     // Request camera and microphone permissions
                     const stream = await navigator.mediaDevices.getUserMedia({ 
                         video: { 
@@ -2599,6 +2653,18 @@
                         }
                     };
                     
+                    // Handle ICE candidates
+                    pc.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            console.log('Sending ICE candidate');
+                            roomRef.child('signaling').push({
+                                type: 'ice-candidate',
+                                candidate: event.candidate,
+                                from: isInitiator ? 'initiator' : 'receiver'
+                            });
+                        }
+                    };
+                    
                     // Handle connection state changes
                     pc.onconnectionstatechange = () => {
                         console.log('Connection state:', pc.connectionState);
@@ -2607,20 +2673,69 @@
                         }
                     };
                     
-                    // For GitHub Pages - show instructions for manual connection
-                    if (isGitHubPages) {
-                        alert(`تم بدء الكاميرا بنجاح! 
-
-للاتصال مع شخص آخر:
-1. شارك كود الغرفة: ${currentRoomId}
-2. اطلب من الشخص الآخر فتح نفس الرابط
-3. اضغط "مكالمة مرئية" في كلا المتصفحين
-
-ملاحظة: هذا التطبيق يعمل بدون خادم - يحتاج كلا الشخصين لفتح نفس الصفحة.`);
+                    // Listen for signaling messages
+                    roomRef.child('signaling').on('child_added', async (snapshot) => {
+                        const data = snapshot.val();
+                        
+                        if (data.type === 'offer' && !isInitiator) {
+                            console.log('Received offer');
+                            try {
+                                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                const answer = await pc.createAnswer();
+                                await pc.setLocalDescription(answer);
+                                
+                                roomRef.child('signaling').push({
+                                    type: 'answer',
+                                    answer: answer,
+                                    from: 'receiver'
+                                });
+                            } catch (error) {
+                                console.error('Error handling offer:', error);
+                            }
+                        }
+                        
+                        if (data.type === 'answer' && isInitiator) {
+                            console.log('Received answer');
+                            try {
+                                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            } catch (error) {
+                                console.error('Error handling answer:', error);
+                            }
+                        }
+                        
+                        if (data.type === 'ice-candidate' && data.from !== (isInitiator ? 'initiator' : 'receiver')) {
+                            console.log('Received ICE candidate');
+                            try {
+                                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            } catch (error) {
+                                console.error('Error adding ICE candidate:', error);
+                            }
+                        }
+                    });
+                    
+                    // Create and send offer if initiator
+                    if (isInitiator) {
+                        const offer = await pc.createOffer();
+                        await pc.setLocalDescription(offer);
+                        
+                        roomRef.child('signaling').push({
+                            type: 'offer',
+                            offer: offer,
+                            from: 'initiator'
+                        });
                     }
                     
                     setIsCallActive(true);
                     console.log('تم بدء المكالمة المرئية');
+                    
+                    // Show success message
+                    if (isGitHubPages) {
+                        alert(`تم بدء المكالمة المرئية بنجاح! 
+
+كود الغرفة: ${currentRoomId}
+
+شارك هذا الكود مع الشخص الآخر للاتصال مباشرة.`);
+                    }
                     
                 } catch (error) {
                     console.error('خطأ في بدء المكالمة المرئية:', error);
@@ -2661,6 +2776,13 @@
                     }
                     if (remoteVideoRef.current) {
                         remoteVideoRef.current.srcObject = null;
+                    }
+                    
+                    // Clean up Firebase listeners
+                    if (roomRef) {
+                        roomRef.child('signaling').off();
+                        roomRef.off();
+                        roomRef = null;
                     }
                     
                     console.log('تم إنهاء المكالمة المرئية');
@@ -2788,7 +2910,7 @@
                 setAudioLevel(0);
             };
             
-            const createRoom = () => {
+            const createNewRoom = () => {
                 const newRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 setRoomCode(newRoomCode);
                 setCurrentView('create-room');
@@ -2847,7 +2969,7 @@
                         
                         <div className="space-y-4">
                             <button
-                                onClick={createRoom}
+                                onClick={createNewRoom}
                                 className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300"
                             >
                                 إنشاء غرفة جديدة
@@ -3065,9 +3187,10 @@
                     {isCallActive && (
                         <div className="glass-effect p-4 rounded-lg mb-6">
                             {isGitHubPages && (
-                                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 mb-4 rounded">
-                                    <p className="font-bold">ملاحظة مهمة:</p>
-                                    <p>هذا التطبيق يعمل بدون خادم. لاستخدام المحادثة الثنائية، يحتاج كلا الشخصين لفتح نفس الصفحة والضغط على "مكالمة مرئية".</p>
+                                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 mb-4 rounded">
+                                    <p className="font-bold">✅ اتصال مباشر متاح!</p>
+                                    <p>الآن يمكنك مشاركة كود الغرفة مع أي شخص للاتصال مباشرة. لا حاجة لفتح نفس الصفحة!</p>
+                                    <p className="text-sm mt-2">كود الغرفة: <strong>{currentRoomId}</strong></p>
                                 </div>
                             )}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
