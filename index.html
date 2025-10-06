@@ -27,22 +27,32 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
+        :root {
+            --primary-color: #081447;
+            --secondary-color: #a2834b;
+            --accent-color: #f093fb;
+            --text-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.504);
+        }
+        
         body {
             font-family: 'Cairo', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
+            transition: background 0.3s ease;
         }
         
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #4ba26f 100%);
         }
         
         .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--glass-border);
         }
         
         .floating-animation {
@@ -955,6 +965,8 @@
         
         // Navigation Component
         function Navigation({ currentPage, onPageChange }) {
+            const [currentColorScheme, setCurrentColorScheme] = useState('blue-purple');
+            
             const pages = [
                 { id: 'home', name: 'الرئيسية', icon: '🏠' },
                 { id: 'translate', name: 'الترجمة', icon: '🌐' },
@@ -963,6 +975,55 @@
                 { id: 'ocr', name: 'قراءة الصور', icon: '📷' },
                 { id: 'settings', name: 'الإعدادات', icon: '⚙️' }
             ];
+            
+            // Color schemes available - 3 harmonious options
+            const colorSchemes = [
+                { id: 'blue-purple', name: 'أزرق-بنفسجي', primary: '#667eea', secondary: '#764ba2' },
+                { id: 'green-teal', name: 'أخضر-تركوازي', primary: '#11998e', secondary: '#38ef7d' },
+                { id: 'sunset', name: 'غروب الشمس', primary: '#ff9a9e', secondary: '#fecfef' }
+            ];
+            
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            };
+            
+            const applyColorScheme = (schemeId) => {
+                const scheme = colorSchemes.find(s => s.id === schemeId);
+                if (scheme) {
+                    // Update CSS variables
+                    document.documentElement.style.setProperty('--primary-color', scheme.primary);
+                    document.documentElement.style.setProperty('--secondary-color', scheme.secondary);
+                    
+                    // Update gradient backgrounds
+                    const gradientBg = `linear-gradient(135deg, ${scheme.primary} 0%, ${scheme.secondary} 100%)`;
+                    document.body.style.background = gradientBg;
+                    
+                    // Update glass effect colors
+                    const glassBg = `rgba(${hexToRgb(scheme.primary).r}, ${hexToRgb(scheme.primary).g}, ${hexToRgb(scheme.primary).b}, 0.1)`;
+                    const glassBorder = `rgba(${hexToRgb(scheme.primary).r}, ${hexToRgb(scheme.primary).g}, ${hexToRgb(scheme.primary).b}, 0.2)`;
+                    
+                    document.documentElement.style.setProperty('--glass-bg', glassBg);
+                    document.documentElement.style.setProperty('--glass-border', glassBorder);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('appColorScheme', schemeId);
+                    setCurrentColorScheme(schemeId);
+                }
+            };
+            
+            // Load saved color scheme on component mount
+            useEffect(() => {
+                const savedScheme = localStorage.getItem('appColorScheme');
+                if (savedScheme) {
+                    setCurrentColorScheme(savedScheme);
+                    applyColorScheme(savedScheme);
+                }
+            }, []);
             
             return (
                 <nav className="glass-effect p-4 mb-6 rounded-lg">
@@ -981,7 +1042,7 @@
                         </h1>
                         
                         {/* Desktop Navigation */}
-                        <div className="hidden lg:flex nav-buttons gap-2">
+                        <div className="hidden lg:flex nav-buttons gap-2 items-center">
                             {pages.map(page => (
                                 <button
                                     key={page.id}
@@ -996,6 +1057,28 @@
                                     {page.name}
                                 </button>
                             ))}
+                            
+                            {/* Color Picker */}
+                            <div className="ml-4 flex items-center gap-2">
+                                <span className="text-white text-sm">🎨</span>
+                                <div className="flex gap-1">
+                                    {colorSchemes.map((scheme) => (
+                                        <button
+                                            key={scheme.id}
+                                            onClick={() => applyColorScheme(scheme.id)}
+                                            className={`w-8 h-8 rounded-full border-2 transition-all duration-300 ${
+                                                currentColorScheme === scheme.id
+                                                    ? 'border-white scale-110'
+                                                    : 'border-white/50 hover:scale-105'
+                                            }`}
+                                            style={{
+                                                background: `linear-gradient(135deg, ${scheme.primary} 0%, ${scheme.secondary} 100%)`
+                                            }}
+                                            title={scheme.name}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                         
                         {/* Mobile Horizontal Scroll Navigation */}
@@ -1016,6 +1099,28 @@
                                             {page.name}
                                         </button>
                                     ))}
+                                    
+                                    {/* Mobile Color Picker */}
+                                    <div className="flex-shrink-0 flex items-center gap-1 px-3 py-2">
+                                        <span className="text-white text-sm">🎨</span>
+                                        <div className="flex gap-1">
+                                            {colorSchemes.map((scheme) => (
+                                                <button
+                                                    key={scheme.id}
+                                                    onClick={() => applyColorScheme(scheme.id)}
+                                                    className={`w-6 h-6 rounded-full border-2 transition-all duration-300 ${
+                                                        currentColorScheme === scheme.id
+                                                            ? 'border-white scale-110'
+                                                            : 'border-white/50 hover:scale-105'
+                                                    }`}
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${scheme.primary} 0%, ${scheme.secondary} 100%)`
+                                                    }}
+                                                    title={scheme.name}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1345,6 +1450,7 @@
             const [isTyping, setIsTyping] = useState(false);
             const [sourceLang, setSourceLang] = useState('ar');
             const [targetLang, setTargetLang] = useState('en');
+            const [isSending, setIsSending] = useState(false);
             const messagesEndRef = useRef(null);
             
             const languages = [
@@ -1363,11 +1469,14 @@
             }, [messages]);
             
             const handleSendMessage = async () => {
-                if (!inputMessage.trim()) return;
+                if (!inputMessage.trim() || isSending) return;
+                
+                setIsSending(true);
+                const messageText = inputMessage.trim();
                 
                 const userMessage = {
                     id: Date.now(),
-                    text: inputMessage,
+                    text: messageText,
                     isUser: true,
                     timestamp: new Date().toLocaleTimeString()
                 };
@@ -1377,7 +1486,7 @@
                 setIsTyping(true);
                 
                 try {
-                    const translation = await TranslationService.translate(inputMessage, sourceLang, targetLang);
+                    const translation = await TranslationService.translate(messageText, sourceLang, targetLang);
                     
                     const botMessage = {
                         id: Date.now() + 1,
@@ -1397,6 +1506,7 @@
                     setMessages(prev => [...prev, errorMessage]);
                 } finally {
                     setIsTyping(false);
+                    setIsSending(false);
                 }
             };
             
@@ -1508,26 +1618,21 @@
                     <div className="glass-effect p-6 rounded-lg">
                         <div className="flex gap-4">
                             <button
-                                onClick={startRecording}
-                                disabled={isRecording}
-                                className={`p-3 rounded-lg transition-all ${
-                                    isRecording 
-                                        ? 'bg-red-600 text-white' 
-                                        : 'bg-purple-600 text-white hover:bg-purple-700'
-                                }`}
+                                onClick={handleVoiceInput}
+                                className="p-3 rounded-lg transition-all bg-purple-600 text-white hover:bg-purple-700"
                             >
-                                {isRecording ? '⏹️' : '🎤'}
+                                🎤
                             </button>
                             <input
                                 type="text"
                                 value={inputMessage}
                                 onChange={(e) => setInputMessage(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                                 placeholder="اكتب رسالتك هنا..."
                                 className="flex-1 p-3 rounded-lg border-2 border-white border-opacity-20 bg-white bg-opacity-10 text-white placeholder-white placeholder-opacity-60"
                             />
                             <button
-                                onClick={sendMessage}
+                                onClick={handleSendMessage}
                                 disabled={!inputMessage.trim() || isSending}
                                 className={`px-6 py-3 rounded-lg transition-all ${
                                     !inputMessage.trim() || isSending
@@ -2165,64 +2270,180 @@
         function SettingsPage() {
             const [settings, setSettings] = useState({
                 theme: 'dark',
+                colorScheme: 'blue-purple',
                 autoTranslate: true,
                 voiceEnabled: true,
-                notifications: true
+                notifications: true,
+                fontSize: 'medium',
+                language: 'ar'
             });
+            
+            // Color schemes available - 3 harmonious options
+            const colorSchemes = [
+                { id: 'blue-purple', name: 'أزرق-بنفسجي', primary: '#667eea', secondary: '#764ba2' },
+                { id: 'green-teal', name: 'أخضر-تركوازي', primary: '#11998e', secondary: '#38ef7d' },
+                { id: 'sunset', name: 'غروب الشمس', primary: '#ff9a9e', secondary: '#fecfef' }
+            ];
             
             const handleSettingChange = (key, value) => {
                 setSettings(prev => ({ ...prev, [key]: value }));
+                
+                // Apply color scheme changes immediately
+                if (key === 'colorScheme') {
+                    applyColorScheme(value);
+                }
             };
+            
+            const applyColorScheme = (schemeId) => {
+                const scheme = colorSchemes.find(s => s.id === schemeId);
+                if (scheme) {
+                    // Update CSS variables
+                    document.documentElement.style.setProperty('--primary-color', scheme.primary);
+                    document.documentElement.style.setProperty('--secondary-color', scheme.secondary);
+                    
+                    // Update gradient backgrounds
+                    const gradientBg = `linear-gradient(135deg, ${scheme.primary} 0%, ${scheme.secondary} 100%)`;
+                    document.body.style.background = gradientBg;
+                    
+                    // Update glass effect colors
+                    const glassBg = `rgba(${hexToRgb(scheme.primary).r}, ${hexToRgb(scheme.primary).g}, ${hexToRgb(scheme.primary).b}, 0.1)`;
+                    const glassBorder = `rgba(${hexToRgb(scheme.primary).r}, ${hexToRgb(scheme.primary).g}, ${hexToRgb(scheme.primary).b}, 0.2)`;
+                    
+                    document.documentElement.style.setProperty('--glass-bg', glassBg);
+                    document.documentElement.style.setProperty('--glass-border', glassBorder);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('appColorScheme', schemeId);
+                }
+            };
+            
+            // Helper function to convert hex to RGB
+            const hexToRgb = (hex) => {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            };
+            
+            // Load saved settings on component mount
+            useEffect(() => {
+                const savedScheme = localStorage.getItem('appColorScheme');
+                if (savedScheme) {
+                    setSettings(prev => ({ ...prev, colorScheme: savedScheme }));
+                    applyColorScheme(savedScheme);
+                }
+            }, []);
             
             return (
                 <div className="fade-in main-content">
                     <div className="glass-effect p-6 rounded-lg">
                         <h2 className="text-2xl font-bold text-white mb-6 text-center">الإعدادات</h2>
                         
-                        <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <span className="text-white">الترجمة التلقائية</span>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.autoTranslate}
-                                        onChange={(e) => handleSettingChange('autoTranslate', e.target.checked)}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                        <div className="space-y-8">
+                            {/* Font Size Selection */}
+                            <div className="settings-section">
+                                <h3 className="text-lg font-semibold text-white mb-4">📝 حجم الخط</h3>
+                                <div className="flex space-x-4">
+                                    {[
+                                        { id: 'small', name: 'صغير', size: '14px' },
+                                        { id: 'medium', name: 'متوسط', size: '16px' },
+                                        { id: 'large', name: 'كبير', size: '18px' },
+                                        { id: 'xlarge', name: 'كبير جداً', size: '20px' }
+                                    ].map((size) => (
+                                        <button
+                                            key={size.id}
+                                            className={`px-4 py-2 rounded-lg transition-all ${
+                                                settings.fontSize === size.id
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-white bg-opacity-20 text-white hover:bg-opacity-30'
+                                            }`}
+                                            onClick={() => handleSettingChange('fontSize', size.id)}
+                                        >
+                                            {size.name}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                             
-                            <div className="flex justify-between items-center">
-                                <span className="text-white">تفعيل الصوت</span>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.voiceEnabled}
-                                        onChange={(e) => handleSettingChange('voiceEnabled', e.target.checked)}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                            {/* App Settings */}
+                            <div className="settings-section">
+                                <h3 className="text-lg font-semibold text-white mb-4">⚙️ إعدادات التطبيق</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white">الترجمة التلقائية</span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.autoTranslate}
+                                                onChange={(e) => handleSettingChange('autoTranslate', e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white">تفعيل الصوت</span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.voiceEnabled}
+                                                onChange={(e) => handleSettingChange('voiceEnabled', e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-white">الإشعارات</span>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={settings.notifications}
+                                                onChange={(e) => handleSettingChange('notifications', e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div className="flex justify-between items-center">
-                                <span className="text-white">الإشعارات</span>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={settings.notifications}
-                                        onChange={(e) => handleSettingChange('notifications', e.target.checked)}
-                                        className="sr-only peer"
-                                    />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
+                            {/* Language Selection */}
+                            <div className="settings-section">
+                                <h3 className="text-lg font-semibold text-white mb-4">🌍 اللغة</h3>
+                                <select
+                                    value={settings.language}
+                                    onChange={(e) => handleSettingChange('language', e.target.value)}
+                                    className="w-full p-3 rounded-lg bg-white bg-opacity-20 text-white border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="ar">العربية</option>
+                                    <option value="en">English</option>
+                                    <option value="fr">Français</option>
+                                    <option value="es">Español</option>
+                                </select>
                             </div>
                         </div>
                         
-                        <div className="mt-8 text-center">
-                            <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all">
-                                حفظ الإعدادات
+                        <div className="text-center mt-8 space-x-4">
+                            <button
+                                onClick={() => {
+                                    // Save all settings to localStorage
+                                    localStorage.setItem('appSettings', JSON.stringify(settings));
+                                    alert('تم حفظ الإعدادات بنجاح!');
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+                            >
+                                💾 حفظ الإعدادات
+                            </button>
+                            <button
+                                onClick={() => onPageChange('home')}
+                                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+                            >
+                                🏠 العودة للرئيسية
                             </button>
                         </div>
                     </div>
@@ -2298,6 +2519,8 @@
             const [localStream, setLocalStream] = useState(null);
             const [remoteStream, setRemoteStream] = useState(null);
             const [peerConnection, setPeerConnection] = useState(null);
+            const [translationError, setTranslationError] = useState(null);
+            const [connectionError, setConnectionError] = useState(null);
             
             const recognition = useRef(null);
             const synthesis = useRef(null);
@@ -2307,6 +2530,37 @@
             const animationFrame = useRef(null);
             const localVideoRef = useRef(null);
             const remoteVideoRef = useRef(null);
+            
+            // Cleanup effect
+            useEffect(() => {
+                return () => {
+                    // Cleanup resources when component unmounts
+                    if (recognition.current) {
+                        recognition.current.stop();
+                    }
+                    if (localStream) {
+                        localStream.getTracks().forEach(track => track.stop());
+                    }
+                    if (peerConnection) {
+                        peerConnection.close();
+                    }
+                    if (animationFrame.current) {
+                        cancelAnimationFrame(animationFrame.current);
+                    }
+                };
+            }, []);
+            
+            // Reset state when changing views
+            useEffect(() => {
+                if (currentView === 'home') {
+                    setMessages([]);
+                    setInputMessage('');
+                    setTranslationError(null);
+                    setConnectionError(null);
+                    setIsConnected(false);
+                    setConnectionState('disconnected');
+                }
+            }, [currentView]);
             
             const languages = [
                 { code: 'ar', name: 'العربية', flag: '🇸🇦' },
@@ -2473,6 +2727,7 @@
                 if (!inputMessage.trim() || isSending) return;
                 
                 setIsSending(true);
+                setTranslationError(null);
                 const messageText = inputMessage.trim();
                 
                 // Add message to chat
@@ -2517,6 +2772,7 @@
                     
                 } catch (error) {
                     console.error('Translation error:', error);
+                    setTranslationError('فشل في ترجمة الرسالة: ' + error.message);
                 } finally {
                     setIsSending(false);
                 }
@@ -2524,17 +2780,23 @@
             
             const translateMessage = async (text, fromLang, toLang) => {
                 try {
+                    setTranslationError(null);
+                    setIsTranslating(true);
+                    
                     const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`);
                     const data = await response.json();
                     
-                    if (data.responseStatus === 200 && data.responseData) {
+                    if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                         return data.responseData.translatedText;
                     } else {
-                        return text; // Return original text if translation fails
+                        throw new Error('فشل في الحصول على ترجمة صحيحة من الخدمة');
                     }
                 } catch (error) {
                     console.error('Translation error:', error);
+                    setTranslationError('فشل في الترجمة: ' + error.message);
                     return text; // Return original text if translation fails
+                } finally {
+                    setIsTranslating(false);
                 }
             };
             
@@ -2589,6 +2851,7 @@
             // Firebase signaling functions
             const createRoom = async () => {
                 try {
+                    setConnectionError(null);
                     roomRef = database.ref(`rooms/${currentRoomId}`);
                     
                     // Check if room exists
@@ -2610,6 +2873,7 @@
                     return true;
                 } catch (error) {
                     console.error('Error creating/joining room:', error);
+                    setConnectionError('فشل في إنشاء/الانضمام للغرفة: ' + error.message);
                     return false;
                 }
             };
@@ -2989,6 +3253,25 @@
                         <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">محادثة ثنائية</h2>
                         <p className="text-white/80 mb-6 text-sm lg:text-base">محادثة صوتية متقدمة مع ترجمة فورية واتصال مباشر</p>
                         
+                        {/* Error Messages */}
+                        {translationError && (
+                            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-4 text-red-200">
+                                <div className="flex items-center">
+                                    <span className="text-red-400 mr-2">⚠️</span>
+                                    <span className="text-sm">{translationError}</span>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {connectionError && (
+                            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mb-4 text-red-200">
+                                <div className="flex items-center">
+                                    <span className="text-red-400 mr-2">🔌</span>
+                                    <span className="text-sm">{connectionError}</span>
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="space-y-4">
                             <button
                                 onClick={createNewRoom}
@@ -3107,8 +3390,26 @@
                 </div>
             );
             
-            const renderChat = () => (
+            const renderChat = () => {
+                console.log('Rendering chat view with:', {
+                    roomCode,
+                    connectionState,
+                    messages: messages.length,
+                    sourceLang,
+                    targetLang
+                });
+                
+                return (
                 <div className="fade-in">
+                    {/* Debug Info */}
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded">
+                        <p className="font-bold">Debug Info:</p>
+                        <p>Room Code: {roomCode}</p>
+                        <p>Connection State: {connectionState}</p>
+                        <p>Messages Count: {messages.length}</p>
+                        <p>Current View: {currentView}</p>
+                    </div>
+                    
                     {/* Header */}
                     <div className="glass-effect p-4 rounded-lg mb-6">
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -3198,6 +3499,32 @@
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {isTranslating && (
+                                    <div className="other-message p-3 rounded-lg">
+                                        <div className="flex items-center text-white/60">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            <div>جاري الترجمة...</div>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                {translationError && (
+                                    <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-200">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                                <span className="text-red-400 mr-2">⚠️</span>
+                                                <span className="text-sm">{translationError}</span>
+                                            </div>
+                                            <button 
+                                                onClick={() => setTranslationError(null)}
+                                                className="text-red-300 hover:text-red-100 text-xs underline"
+                                            >
+                                                إخفاء
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -3346,6 +3673,7 @@
                     </div>
                 </div>
             );
+            };
             
             switch (currentView) {
                 case 'create-room':
@@ -3362,6 +3690,35 @@
         // Main App Component
         function App() {
             const [currentPage, setCurrentPage] = useState('home');
+            const [appSettings, setAppSettings] = useState({
+                colorScheme: 'blue-purple',
+                fontSize: 'medium',
+                language: 'ar'
+            });
+            
+            // Load settings on app start
+            useEffect(() => {
+                const savedSettings = localStorage.getItem('appSettings');
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    setAppSettings(settings);
+                    
+                    // Apply color scheme
+                    if (settings.colorScheme) {
+                        const colorSchemes = [
+                            { id: 'blue-purple', primary: '#667eea', secondary: '#764ba2' },
+                            { id: 'green-teal', primary: '#11998e', secondary: '#38ef7d' },
+                            { id: 'sunset', primary: '#ff9a9e', secondary: '#fecfef' }
+                        ];
+                        
+                        const scheme = colorSchemes.find(s => s.id === settings.colorScheme);
+                        if (scheme) {
+                            const gradientBg = `linear-gradient(135deg, ${scheme.primary} 0%, ${scheme.secondary} 100%)`;
+                            document.body.style.background = gradientBg;
+                        }
+                    }
+                }
+            }, []);
             
             const renderPage = () => {
                 switch (currentPage) {
